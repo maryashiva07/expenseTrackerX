@@ -19,14 +19,19 @@ app.use("/api", signRouter);
 const PORT = process.env.PORT || 4555;
 
 async function startServer(){
-    await sequelize.authenticate();
-    console.log("database connected successfully!");
-    await sequelize.sync();
-    console.log("table has sync!");
+   try{
+           await sequelize.authenticate();
+           console.log("database connected successfully!");
+          await sequelize.sync();
+          console.log("table has sync!");
 
-    app.listen(PORT, ()=>{
-         console.log("Server is running on Port : ", PORT);
-    })
+          app.listen(PORT, ()=>{
+             console.log("Server is running on Port : ", PORT);
+            })
+       }
+       catch(err){
+          console.log("error on connecting server", err);
+       }
 
 };
 

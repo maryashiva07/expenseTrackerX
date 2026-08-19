@@ -1,4 +1,7 @@
 
+const API_URL = "/api";
+// const API_URL = "http://localhost:4555/api";
+
 async function handleForm(event){
      event.preventDefault();
      
@@ -9,7 +12,7 @@ async function handleForm(event){
      };
 
      try{
-           const response = await fetch("http://localhost:4555/api/signup", {
+           const response = await fetch(`${API_URL}/signup`, {
           method: "POST",
           headers: {
              "Content-Type" : "application/json"

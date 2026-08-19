@@ -10,19 +10,20 @@
     <div class="main">
           <h2>
             <span class="success-icon">✓</span>
-            SignUp Page!
-
+            Login Page!
           </h2>
-          <form onsubmit="handleForm(event)">
-               <label for="name">Name:</label>
-               <input type="text" placeholder="your name.." name="name" id="name">
+          <form onsubmit="loginHandler(event)">
                <label for="email">Email:</label>
                <input type="email" placeholder="your email.." name="email" id="email" required>
                <label for="password">Password:</label>
                <input type="password" placeholder="your password.." name="password" id="password">
                <button type="submit">Submit</button>
           </form>
-          <p>Already have an account?<span><a href="login.html">Login</a></span></p>
+          <p>
+            New user?
+            <span><a href="signup.html">Sign Up</a></span>
+        </p>
+
     </div>
 </body>
 <script src="auth.js"></script>
