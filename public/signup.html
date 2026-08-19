@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignUp</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="main">
+          <h2>
+            <span class="success-icon">✓</span>
+            SignUp Page!
+
+          </h2>
+          <form onsubmit="handleForm(event)">
+               <label for="name">Name:</label>
+               <input type="text" placeholder="your name.." name="name" id="name">
+               <label for="email">Email:</label>
+               <input type="email" placeholder="your email.." name="email" id="email" required>
+               <label for="password">Password:</label>
+               <input type="password" placeholder="your password.." name="password" id="password">
+               <button type="submit">Submit</button>
+          </form>
+          <p>Already have an account?<span>Login</span></p>
+    </div>
+</body>
+<script src="auth.js"></script>
+</html>
