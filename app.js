@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const sequelize = require("./config/database");
 const signRouter = require("./routes/userRoutes");
+const loginRouter = require("./routes/userRoutes");
 
 const app = express();
 
@@ -15,8 +16,15 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", signRouter);
+app.use("/api", loginRouter);
 
 const PORT = process.env.PORT || 4555;
+
+
+//intial rendering
+app.get("/", (req, res)=>{
+     res.sendFile(path.join(__dirname, "public", "login.html"));
+})
 
 async function startServer(){
    try{
