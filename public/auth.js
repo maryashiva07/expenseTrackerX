@@ -68,6 +68,7 @@ async function loginHandler(event){
            else{
                   alert("User login Successfull!");
                   event.target.reset();
+                  window.location.href = "expense.html";
            }
 
             // Store JWT
