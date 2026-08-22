@@ -39,7 +39,8 @@ const signupUser = async (req, res) =>{
                  user:{
                     id: user.id,
                     name: user.name,
-                    email: user.email
+                    email: user.email,
+                    isPremium: user.isPremium
                  }
             })
       }
@@ -99,7 +100,8 @@ const loginUser = async (req, res) =>{
                  user: {
                      id: user.id,
                      name: user.name,
-                     email: user.email
+                     email: user.email,
+                     isPremium: user.isPremium
                  }
             });
       }

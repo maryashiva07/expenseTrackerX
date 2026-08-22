@@ -6,6 +6,297 @@
 }
 
 
+/* ========================================
+   DARK THEME
+======================================== */
+
+body.dark-theme {
+    background: #111827;
+    color: #e5e7eb;
+}
+
+
+/* Header */
+
+body.dark-theme .header {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+
+/* Brand */
+
+body.dark-theme .brand h1 {
+    color: #f9fafb;
+}
+
+body.dark-theme .brand p {
+    color: #9ca3af;
+}
+
+
+/* User */
+
+body.dark-theme .user-info strong {
+    color: #f9fafb;
+}
+
+body.dark-theme .user-info small {
+    color: #9ca3af;
+}
+
+body.dark-theme .user-avatar {
+    background: #312e81;
+    color: #a5b4fc;
+}
+
+
+/* Logout */
+
+body.dark-theme .logout-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #f87171;
+}
+
+body.dark-theme .logout-btn:hover {
+    background: #374151;
+}
+
+
+/* Theme button */
+
+#themeToggle {
+    width: 38px;
+    height: 38px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    background: white;
+
+    cursor: pointer;
+
+    font-size: 17px;
+
+    transition: 0.2s;
+}
+
+#themeToggle:hover {
+    transform: scale(1.05);
+}
+
+
+/* Welcome */
+
+body.dark-theme .welcome h2 {
+    color: #f9fafb;
+}
+
+body.dark-theme .welcome p {
+    color: #9ca3af;
+}
+
+
+/* Total card */
+
+body.dark-theme .total-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+body.dark-theme .total-card span {
+    color: #9ca3af;
+}
+
+
+/* Main cards */
+
+body.dark-theme .expense-form-card,
+body.dark-theme .expense-table-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+
+/* Section heading */
+
+body.dark-theme .section-heading h3 {
+    color: #f9fafb;
+}
+
+body.dark-theme .section-heading p {
+    color: #9ca3af;
+}
+
+body.dark-theme .heading-icon {
+    background: #312e81;
+    color: #a5b4fc;
+}
+
+
+/* Labels */
+
+body.dark-theme .form-group label {
+    color: #d1d5db;
+}
+
+
+/* Inputs */
+
+body.dark-theme input,
+body.dark-theme select {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+body.dark-theme input::placeholder {
+    color: #6b7280;
+}
+
+body.dark-theme input:focus,
+body.dark-theme select:focus {
+    border-color: #818cf8;
+}
+
+
+/* Table */
+
+body.dark-theme thead {
+    background: #111827;
+}
+
+body.dark-theme th {
+    color: #9ca3af;
+}
+
+body.dark-theme td {
+    color: #d1d5db;
+    border-color: #374151;
+}
+
+body.dark-theme tbody tr:hover {
+    background: #263244;
+}
+
+
+/* Amount */
+
+body.dark-theme td:nth-child(5) {
+    color: #f9fafb;
+}
+
+
+/* Delete button */
+
+body.dark-theme .delete-btn {
+    background: #1f2937;
+    border-color: #7f1d1d;
+    color: #f87171;
+}
+
+body.dark-theme .delete-btn:hover {
+    background: #450a0a;
+}
+
+
+/* Table header */
+
+body.dark-theme .table-header {
+    border-color: #374151;
+}
+
+body.dark-theme .table-header h3 {
+    color: #f9fafb;
+}
+
+body.dark-theme .table-header p {
+    color: #9ca3af;
+}
+
+
+/* Expense count */
+
+body.dark-theme .expense-count {
+    background: #312e81;
+    color: #c7d2fe;
+}
+
+
+/* Empty state */
+
+body.dark-theme .empty-icon {
+    background: #374151;
+    color: #9ca3af;
+}
+
+body.dark-theme .empty-state h4 {
+    color: #e5e7eb;
+}
+
+body.dark-theme .empty-state p {
+    color: #9ca3af;
+}
+
+
+/* Footer */
+
+body.dark-theme footer {
+    color: #6b7280;
+}
+
+
+/* Theme button in dark mode */
+
+body.dark-theme #themeToggle {
+    background: #374151;
+    border-color: #4b5563;
+}
+
+
+/* ================================
+   PREMIUM MEMBERSHIP BUTTON
+================================ */
+
+.premium-btn {
+    border: none;
+    outline: none;
+
+    padding: 10px 16px;
+
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+
+    transition: all 0.25s ease;
+
+    white-space: nowrap;
+}
+
+.premium-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow: 0 7px 18px rgba(249, 115, 22, 0.35);
+
+    background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.premium-btn:active {
+    transform: translateY(0);
+}
+
+
 
 body {
     min-height: 100vh;
@@ -598,6 +889,7 @@ td {
     font-size: 13px;
 
     color: #374151;
+    text-transform: capitalize;
 }
 
 
@@ -820,4 +1112,43 @@ footer {
         white-space: nowrap;
     }
 
+}
+
+
+@media (max-width: 768px) {
+
+    .logout-btn {
+        font-size: 0;
+        padding: 8px 10px;
+    }
+
+    .logout-btn::after {
+        content: "↪";
+        font-size: 22px;
+        font-weight: bold;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .user-section {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .premium-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .premium-btn {
+        font-size: 0;
+    }
+
+    .premium-btn::after {
+        content: "💎";
+        font-size: 12px;
+        font-weight: 700;
+    }
 }

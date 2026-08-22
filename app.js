@@ -8,6 +8,9 @@ const sequelize = require("./config/database");
 const signRouter = require("./routes/userRoutes");
 const loginRouter = require("./routes/userRoutes");
 const expenseRouter = require("./routes/expenseRoutes");
+const paymentRouter = require("./routes/paymentRoutes");
+const {connectRedis} = require("./config/redis");
+
 
 const app = express();
 
@@ -19,6 +22,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api", signRouter);
 app.use("/api", loginRouter);
 app.use("/api", expenseRouter);
+app.use("/api/payment", paymentRouter);
 
 const PORT = process.env.PORT || 4555;
 
@@ -34,6 +38,8 @@ async function startServer(){
            console.log("database connected successfully!");
           await sequelize.sync();
           console.log("table has sync!");
+
+          await connectRedis();
 
           app.listen(PORT, ()=>{
              console.log("Server is running on Port : ", PORT);

@@ -1,9 +1,11 @@
 const API_URL = "/api";
 
+const cashfree = Cashfree({
+    mode: "sandbox"
+});
 
-// ========================================
-// AUTHENTICATION
-// ========================================
+
+// AUTH
 
 const token = localStorage.getItem("token");
 
@@ -11,20 +13,15 @@ const user = JSON.parse(
     localStorage.getItem("user") || "null"
 );
 
-
-// If user is not logged in
 if (!token) {
-
     window.location.href = "login.html";
-
 }
 
 
-// ========================================
-// DOM ELEMENTS
-// ========================================
+// DOM
 
-const expenseForm = document.getElementById("expenseForm");
+const expenseForm =
+    document.getElementById("expenseForm");
 
 const expenseTableBody =
     document.getElementById("expenseTableBody");
@@ -44,23 +41,53 @@ const userEmail =
 const logoutBtn =
     document.getElementById("logoutBtn");
 
+const premiumBtn =
+    document.getElementById("premiumBtn");
 
-// ========================================
-// SHOW USER INFORMATION
-// ========================================
+
+// USER INFO
 
 if (user) {
 
-    username.textContent = user.name || "User";
+    username.textContent =
+        user.name || "User";
 
-    userEmail.textContent = user.email || "";
+    userEmail.textContent =
+        user.email || "";
 
 }
 
 
-// ========================================
+// PREMIUM BUTTON
+
+function setPremiumBtn() {
+
+    if (!premiumBtn) return;
+
+    premiumBtn.textContent =
+        "👑 Premium Member";
+
+    premiumBtn.disabled = true;
+
+    premiumBtn.style.opacity = "0.7";
+
+    premiumBtn.style.cursor = "not-allowed";
+}
+
+
+// Restore premium status
+
+if (
+    user &&
+    user.isPremium === true
+) {
+
+    setPremiumBtn();
+
+}
+
+
 // LOGOUT
-// ========================================
 
 logoutBtn.addEventListener("click", () => {
 
@@ -73,102 +100,103 @@ logoutBtn.addEventListener("click", () => {
 });
 
 
-// ========================================
 // ADD EXPENSE
-// ========================================
 
-expenseForm.addEventListener("submit", async (event) => {
+expenseForm.addEventListener(
+    "submit",
+    async (event) => {
 
-    event.preventDefault();
+        event.preventDefault();
+
+        const data = {
+
+            amount:
+                Number(
+                    document.getElementById(
+                        "amount"
+                    ).value
+                ),
+
+            description:
+                document.getElementById(
+                    "description"
+                ).value,
+
+            category:
+                document.getElementById(
+                    "category"
+                ).value
+
+        };
 
 
-    const data = {
+        try {
 
-        amount:
-            Number(document.getElementById("amount").value),
+            const response = await fetch(
+                `${API_URL}/expenses`,
+                {
 
-        description:
-            document.getElementById("description").value,
+                    method: "POST",
 
-        category:
-            document.getElementById("category").value
+                    headers: {
 
-    };
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${token}`
+
+                    },
+
+                    body:
+                        JSON.stringify(data)
+
+                }
+            );
 
 
-    console.log("Expense:", data);
+            const result =
+                await response.json();
 
 
-    try {
+            if (!response.ok) {
 
-        const response = await fetch(
-            `${API_URL}/expenses`,
-            {
+                alert(
+                    result.message ||
+                    "Failed to add expense"
+                );
 
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        `Bearer ${token}`
-
-                },
-
-                body: JSON.stringify(data)
-
+                return;
             }
-        );
 
-
-        const result = await response.json();
-
-
-        console.log("Backend:", result);
-
-
-        if (!response.ok) {
 
             alert(
                 result.message ||
-                "Failed to add expense"
+                "Expense added successfully!"
             );
 
-            return;
+
+            expenseForm.reset();
+
+            fetchExpenses();
+
         }
 
+        catch (error) {
 
-        alert(
-            result.message ||
-            "Expense added successfully!"
-        );
+            console.error(error);
 
+            alert(
+                "Server error. Please try again."
+            );
 
-        // Clear form
-        expenseForm.reset();
-
-
-        // Fetch updated expenses
-        fetchExpenses();
+        }
 
     }
-
-    catch (error) {
-
-        console.error(error);
-
-        alert("Server error. Please try again.");
-
-    }
-
-});
+);
 
 
-// ========================================
-// GET ALL EXPENSES
-// ========================================
+// GET EXPENSES
 
 async function fetchExpenses() {
 
@@ -191,10 +219,8 @@ async function fetchExpenses() {
         );
 
 
-        const result = await response.json();
-
-
-        console.log("Expenses:", result);
+        const result =
+            await response.json();
 
 
         if (!response.ok) {
@@ -207,11 +233,6 @@ async function fetchExpenses() {
             return;
         }
 
-
-        /*
-            Depending on your backend response,
-            expenses may be inside result.expenses.
-        */
 
         const expenses =
             result.expenses || result;
@@ -230,17 +251,17 @@ async function fetchExpenses() {
 }
 
 
-// ========================================
 // DISPLAY EXPENSES
-// ========================================
 
 function displayExpenses(expenses) {
 
     expenseTableBody.innerHTML = "";
 
 
-    // No expenses
-    if (!expenses || expenses.length === 0) {
+    if (
+        !expenses ||
+        expenses.length === 0
+    ) {
 
         expenseTableBody.innerHTML = `
 
@@ -271,6 +292,7 @@ function displayExpenses(expenses) {
 
         `;
 
+
         totalExpense.textContent = "0";
 
         expenseCount.textContent =
@@ -283,75 +305,86 @@ function displayExpenses(expenses) {
     let total = 0;
 
 
-    expenses.forEach((expense, index) => {
+    expenses.forEach(
+        (expense, index) => {
 
-        total += Number(expense.amount);
-
-
-        const row =
-            document.createElement("tr");
+            total +=
+                Number(expense.amount);
 
 
-        /*
-            Convert database date
-            into readable date.
-        */
+            const row =
+                document.createElement("tr");
 
-        const date =
-            expense.createdAt
-                ? new Date(
+
+            const date =
+                new Date(
                     expense.createdAt
-                ).toLocaleDateString()
-                : "-";
+                );
 
 
-        row.innerHTML = `
-
-            <td>
-                ${index + 1}
-            </td>
-
-            <td>
-                ${expense.description}
-            </td>
-
-            <td>
-                ${expense.category}
-            </td>
-
-            <td>
-                ${date}
-            </td>
-
-            <td>
-                ₹${Number(expense.amount).toFixed(2)}
-            </td>
-
-            <td>
-
-                <button
-                    class="delete-btn"
-                    onclick="deleteExpense(${expense.id})"
-                >
-                    Delete
-                </button>
-
-            </td>
-
-        `;
+            const month =
+                date.getMonth() + 1 <= 9
+                    ? "0" +
+                      (date.getMonth() + 1)
+                    : date.getMonth() + 1;
 
 
-        expenseTableBody.appendChild(row);
+            const newDate =
+                date.getDate() +
+                "/" +
+                month +
+                "/" +
+                date.getFullYear();
 
-    });
+
+            row.innerHTML = `
+
+                <td>
+                    ${index + 1}
+                </td>
+
+                <td>
+                    ${expense.description}
+                </td>
+
+                <td>
+                    ${expense.category}
+                </td>
+
+                <td>
+                    ${newDate}
+                </td>
+
+                <td>
+                    ₹${Number(
+                        expense.amount
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteExpense(${expense.id})"
+                    >
+                        Delete
+                    </button>
+
+                </td>
+
+            `;
 
 
-    // Update total
+            expenseTableBody.appendChild(row);
+
+        }
+    );
+
+
     totalExpense.textContent =
         total.toFixed(2);
 
 
-    // Update count
     expenseCount.textContent =
         `${expenses.length} ${
             expenses.length === 1
@@ -362,9 +395,7 @@ function displayExpenses(expenses) {
 }
 
 
-// ========================================
 // DELETE EXPENSE
-// ========================================
 
 async function deleteExpense(id) {
 
@@ -402,9 +433,6 @@ async function deleteExpense(id) {
             await response.json();
 
 
-        console.log(result);
-
-
         if (!response.ok) {
 
             alert(
@@ -422,7 +450,6 @@ async function deleteExpense(id) {
         );
 
 
-        // Refresh table
         fetchExpenses();
 
     }
@@ -440,8 +467,381 @@ async function deleteExpense(id) {
 }
 
 
-// ========================================
-// FETCH EXPENSES WHEN PAGE LOADS
-// ========================================
+// THEME
+
+const themeToggle =
+    document.getElementById(
+        "themeToggle"
+    );
+
+
+const savedTheme =
+    localStorage.getItem("theme");
+
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add(
+        "dark-theme"
+    );
+
+    themeToggle.textContent = "🌙";
+
+}
+
+else {
+
+    themeToggle.textContent = "🌞";
+
+}
+
+
+themeToggle.addEventListener(
+    "click",
+    () => {
+
+        document.body.classList.toggle(
+            "dark-theme"
+        );
+
+
+        const isDark =
+            document.body.classList.contains(
+                "dark-theme"
+            );
+
+
+        if (isDark) {
+
+            themeToggle.textContent =
+                "🌙";
+
+            localStorage.setItem(
+                "theme",
+                "dark"
+            );
+
+        }
+
+        else {
+
+            themeToggle.textContent =
+                "🌞";
+
+            localStorage.setItem(
+                "theme",
+                "light"
+            );
+
+        }
+
+    }
+);
+
+
+// PAYMENT
+
+premiumBtn.addEventListener(
+    "click",
+    async () => {
+
+        const phone =
+            prompt(
+                "Enter your 10 digit mobile number"
+            );
+
+
+        if (phone === null) {
+            return;
+        }
+
+
+        const cleanPhone =
+            phone.trim();
+
+
+        if (
+            !/^[6-9]\d{9}$/.test(
+                cleanPhone
+            )
+        ) {
+
+            alert(
+                "Please enter a valid 10 digit mobile number"
+            );
+
+            return;
+        }
+
+
+        try {
+
+            premiumBtn.disabled = true;
+
+            premiumBtn.innerText =
+                "Processing...";
+
+
+            const currentToken =
+                localStorage.getItem(
+                    "token"
+                );
+
+
+            const response =
+                await fetch(
+                    "/api/payment/create-order",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                `Bearer ${currentToken}`
+
+                        },
+
+                        body:
+                            JSON.stringify({
+                                phone:
+                                    cleanPhone
+                            })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                alert(
+                    data.message ||
+                    "Unable to create order"
+                );
+
+
+                premiumBtn.disabled =
+                    false;
+
+                premiumBtn.innerText =
+                    "💎 Buy Premium Membership";
+
+                return;
+            }
+
+
+            await cashfree.checkout({
+
+                paymentSessionId:
+                    data.paymentSessionId,
+
+                redirectTarget:
+                    "_self"
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.log(
+                "Payment Error:",
+                error
+            );
+
+
+            alert(
+                "Something went wrong. Please try again."
+            );
+
+
+            premiumBtn.disabled =
+                false;
+
+            premiumBtn.innerText =
+                "💎 Buy Premium Membership";
+
+        }
+
+    }
+);
+
+
+// PAYMENT VERIFICATION
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const orderId =
+    urlParams.get("order_id");
+
+
+console.log(
+    "ORDER ID FROM URL:",
+    orderId
+);
+
+
+if (orderId) {
+
+    const verifyPayment =
+        async () => {
+
+            try {
+
+                const currentToken =
+                    localStorage.getItem(
+                        "token"
+                    );
+
+
+                console.log(
+                    "Calling payment verification..."
+                );
+
+
+                const response =
+                    await fetch(
+                        `/api/payment/verify/${orderId}`,
+                        {
+
+                            method: "GET",
+
+                            headers: {
+
+                                "Authorization":
+                                    `Bearer ${currentToken}`
+
+                            }
+
+                        }
+                    );
+
+
+                console.log(
+                    "Verification HTTP Status:",
+                    response.status
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "Verification Response:",
+                    data
+                );
+
+
+                if (
+                    response.ok &&
+                    data.status ===
+                        "SUCCESSFUL"
+                ) {
+
+                    alert(
+                        "Transaction successful"
+                    );
+
+
+                    const currentUser =
+                        JSON.parse(
+                            localStorage.getItem(
+                                "user"
+                            ) || "null"
+                        );
+
+
+                    if (currentUser) {
+
+                        currentUser.isPremium =
+                            true;
+
+
+                        localStorage.setItem(
+                            "user",
+                            JSON.stringify(
+                                currentUser
+                            )
+                        );
+
+                    }
+
+
+                    setPremiumBtn();
+
+
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        window.location.pathname
+                    );
+
+                }
+
+                else if (
+                    data.status === "FAILED"
+                ) {
+
+                    alert(
+                        "TRANSACTION FAILED."
+                    );
+
+
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        window.location.pathname
+                    );
+
+                }
+
+                else {
+
+                    alert(
+                        data.message ||
+                        "Unable to verify transaction."
+                    );
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Verification Error:",
+                    error
+                );
+
+                alert(
+                    "Unable to verify transaction."
+                );
+
+            }
+
+        };
+
+
+    verifyPayment();
+
+}
+
+
+// INITIAL LOAD
 
 fetchExpenses();
