@@ -4,9 +4,6 @@ const cashfree = Cashfree({
     mode: "sandbox"
 });
 
-
-// AUTH
-
 const token = localStorage.getItem("token");
 
 const user = JSON.parse(
@@ -17,8 +14,7 @@ if (!token) {
     window.location.href = "login.html";
 }
 
-
-// DOM
+let expenses = [];
 
 const expenseForm =
     document.getElementById("expenseForm");
@@ -44,24 +40,30 @@ const logoutBtn =
 const premiumBtn =
     document.getElementById("premiumBtn");
 
+const boardBtn =
+    document.getElementById("boardBtn");
 
-// USER INFO
+const leaderboardOverlay =
+    document.getElementById("leaderboardOverlay");
+
+const closeLeaderboard =
+    document.getElementById("closeLeaderboard");
+
+const leaderboardList =
+    document.getElementById("leaderboardList");
+
+const leaderboardTotal =
+    document.getElementById("leaderboardTotal");
 
 if (user) {
-
     username.textContent =
         user.name || "User";
 
     userEmail.textContent =
         user.email || "";
-
 }
 
-
-// PREMIUM BUTTON
-
 function setPremiumBtn() {
-
     if (!premiumBtn) return;
 
     premiumBtn.textContent =
@@ -71,36 +73,27 @@ function setPremiumBtn() {
 
     premiumBtn.style.opacity = "0.7";
 
-    premiumBtn.style.cursor = "not-allowed";
+    premiumBtn.style.cursor =
+        "not-allowed";
 }
-
-
-// Restore premium status
 
 if (
     user &&
     user.isPremium === true
 ) {
-
     setPremiumBtn();
-
 }
 
+logoutBtn.addEventListener(
+    "click",
+    () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
 
-// LOGOUT
-
-logoutBtn.addEventListener("click", () => {
-
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("user");
-
-    window.location.href = "login.html";
-
-});
-
-
-// ADD EXPENSE
+        window.location.href =
+            "login.html";
+    }
+);
 
 expenseForm.addEventListener(
     "submit",
@@ -109,13 +102,11 @@ expenseForm.addEventListener(
         event.preventDefault();
 
         const data = {
-
-            amount:
-                Number(
-                    document.getElementById(
-                        "amount"
-                    ).value
-                ),
+            amount: Number(
+                document.getElementById(
+                    "amount"
+                ).value
+            ),
 
             description:
                 document.getElementById(
@@ -126,38 +117,31 @@ expenseForm.addEventListener(
                 document.getElementById(
                     "category"
                 ).value
-
         };
-
 
         try {
 
-            const response = await fetch(
-                `${API_URL}/expenses`,
-                {
+            const response =
+                await fetch(
+                    `${API_URL}/expenses`,
+                    {
+                        method: "POST",
 
-                    method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json",
 
-                    headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        },
 
-                        "Content-Type":
-                            "application/json",
-
-                        "Authorization":
-                            `Bearer ${token}`
-
-                    },
-
-                    body:
-                        JSON.stringify(data)
-
-                }
-            );
-
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
 
             const result =
                 await response.json();
-
 
             if (!response.ok) {
 
@@ -169,59 +153,45 @@ expenseForm.addEventListener(
                 return;
             }
 
-
             alert(
                 result.message ||
                 "Expense added successfully!"
             );
 
-
             expenseForm.reset();
 
-            fetchExpenses();
+            await fetchExpenses();
 
-        }
-
-        catch (error) {
+        } catch (error) {
 
             console.error(error);
 
             alert(
                 "Server error. Please try again."
             );
-
         }
-
     }
 );
-
-
-// GET EXPENSES
 
 async function fetchExpenses() {
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/expenses`,
-            {
+        const response =
+            await fetch(
+                `${API_URL}/expenses`,
+                {
+                    method: "GET",
 
-                method: "GET",
-
-                headers: {
-
-                    "Authorization":
-                        `Bearer ${token}`
-
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`
+                    }
                 }
-
-            }
-        );
-
+            );
 
         const result =
             await response.json();
-
 
         if (!response.ok) {
 
@@ -233,30 +203,22 @@ async function fetchExpenses() {
             return;
         }
 
+        expenses =
+            Array.isArray(result)
+                ? result
+                : result.expenses || [];
 
-        const expenses =
-            result.expenses || result;
+        displayExpenses();
 
-
-        displayExpenses(expenses);
-
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(error);
-
     }
-
 }
 
-
-// DISPLAY EXPENSES
-
-function displayExpenses(expenses) {
+function displayExpenses() {
 
     expenseTableBody.innerHTML = "";
-
 
     if (
         !expenses ||
@@ -264,13 +226,9 @@ function displayExpenses(expenses) {
     ) {
 
         expenseTableBody.innerHTML = `
-
             <tr class="empty-row">
-
                 <td colspan="6">
-
                     <div class="empty-state">
-
                         <div class="empty-icon">
                             ₹
                         </div>
@@ -283,51 +241,48 @@ function displayExpenses(expenses) {
                             Add your first expense
                             using the form above.
                         </p>
-
                     </div>
-
                 </td>
-
             </tr>
-
         `;
-
 
         totalExpense.textContent = "0";
 
         expenseCount.textContent =
             "0 expenses";
 
+        renderLeaderboard();
+
         return;
     }
 
-
     let total = 0;
-
 
     expenses.forEach(
         (expense, index) => {
 
             total +=
-                Number(expense.amount);
-
+                Number(
+                    expense.amount || 0
+                );
 
             const row =
-                document.createElement("tr");
-
+                document.createElement(
+                    "tr"
+                );
 
             const date =
                 new Date(
                     expense.createdAt
                 );
 
-
             const month =
                 date.getMonth() + 1 <= 9
                     ? "0" +
-                      (date.getMonth() + 1)
+                      (
+                          date.getMonth() + 1
+                      )
                     : date.getMonth() + 1;
-
 
             const newDate =
                 date.getDate() +
@@ -336,19 +291,21 @@ function displayExpenses(expenses) {
                 "/" +
                 date.getFullYear();
 
-
             row.innerHTML = `
-
                 <td>
                     ${index + 1}
                 </td>
 
                 <td>
-                    ${expense.description}
+                    ${escapeHTML(
+                        expense.description
+                    )}
                 </td>
 
                 <td>
-                    ${expense.category}
+                    ${escapeHTML(
+                        expense.category
+                    )}
                 </td>
 
                 <td>
@@ -357,33 +314,28 @@ function displayExpenses(expenses) {
 
                 <td>
                     ₹${Number(
-                        expense.amount
+                        expense.amount || 0
                     ).toFixed(2)}
                 </td>
 
                 <td>
-
                     <button
                         class="delete-btn"
                         onclick="deleteExpense(${expense.id})"
                     >
                         Delete
                     </button>
-
                 </td>
-
             `;
 
-
-            expenseTableBody.appendChild(row);
-
+            expenseTableBody.appendChild(
+                row
+            );
         }
     );
 
-
     totalExpense.textContent =
         total.toFixed(2);
-
 
     expenseCount.textContent =
         `${expenses.length} ${
@@ -392,10 +344,8 @@ function displayExpenses(expenses) {
                 : "expenses"
         }`;
 
+    renderLeaderboard();
 }
-
-
-// DELETE EXPENSE
 
 async function deleteExpense(id) {
 
@@ -404,34 +354,27 @@ async function deleteExpense(id) {
             "Are you sure you want to delete this expense?"
         );
 
-
     if (!confirmDelete) {
         return;
     }
 
-
     try {
 
-        const response = await fetch(
-            `${API_URL}/expenses/${id}`,
-            {
+        const response =
+            await fetch(
+                `${API_URL}/expenses/${id}`,
+                {
+                    method: "DELETE",
 
-                method: "DELETE",
-
-                headers: {
-
-                    "Authorization":
-                        `Bearer ${token}`
-
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`
+                    }
                 }
-
-            }
-        );
-
+            );
 
         const result =
             await response.json();
-
 
         if (!response.ok) {
 
@@ -443,41 +386,30 @@ async function deleteExpense(id) {
             return;
         }
 
-
         alert(
             result.message ||
             "Expense deleted successfully!"
         );
 
+        await fetchExpenses();
 
-        fetchExpenses();
-
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(error);
 
         alert(
             "Server error. Please try again."
         );
-
     }
-
 }
-
-
-// THEME
 
 const themeToggle =
     document.getElementById(
         "themeToggle"
     );
 
-
 const savedTheme =
     localStorage.getItem("theme");
-
 
 if (savedTheme === "dark") {
 
@@ -487,14 +419,10 @@ if (savedTheme === "dark") {
 
     themeToggle.textContent = "🌙";
 
-}
-
-else {
+} else {
 
     themeToggle.textContent = "🌞";
-
 }
-
 
 themeToggle.addEventListener(
     "click",
@@ -504,12 +432,10 @@ themeToggle.addEventListener(
             "dark-theme"
         );
 
-
         const isDark =
             document.body.classList.contains(
                 "dark-theme"
             );
-
 
         if (isDark) {
 
@@ -521,9 +447,7 @@ themeToggle.addEventListener(
                 "dark"
             );
 
-        }
-
-        else {
+        } else {
 
             themeToggle.textContent =
                 "🌞";
@@ -532,14 +456,9 @@ themeToggle.addEventListener(
                 "theme",
                 "light"
             );
-
         }
-
     }
 );
-
-
-// PAYMENT
 
 premiumBtn.addEventListener(
     "click",
@@ -550,15 +469,12 @@ premiumBtn.addEventListener(
                 "Enter your 10 digit mobile number"
             );
 
-
         if (phone === null) {
             return;
         }
 
-
         const cleanPhone =
             phone.trim();
-
 
         if (
             !/^[6-9]\d{9}$/.test(
@@ -573,7 +489,6 @@ premiumBtn.addEventListener(
             return;
         }
 
-
         try {
 
             premiumBtn.disabled = true;
@@ -581,28 +496,23 @@ premiumBtn.addEventListener(
             premiumBtn.innerText =
                 "Processing...";
 
-
             const currentToken =
                 localStorage.getItem(
                     "token"
                 );
 
-
             const response =
                 await fetch(
                     "/api/payment/create-order",
                     {
-
                         method: "POST",
 
                         headers: {
-
                             "Content-Type":
                                 "application/json",
 
                             "Authorization":
                                 `Bearer ${currentToken}`
-
                         },
 
                         body:
@@ -610,14 +520,11 @@ premiumBtn.addEventListener(
                                 phone:
                                     cleanPhone
                             })
-
                     }
                 );
 
-
             const data =
                 await response.json();
-
 
             if (
                 !response.ok ||
@@ -629,7 +536,6 @@ premiumBtn.addEventListener(
                     "Unable to create order"
                 );
 
-
                 premiumBtn.disabled =
                     false;
 
@@ -639,61 +545,41 @@ premiumBtn.addEventListener(
                 return;
             }
 
-
             await cashfree.checkout({
-
                 paymentSessionId:
                     data.paymentSessionId,
 
                 redirectTarget:
                     "_self"
-
             });
 
-        }
-
-        catch (error) {
+        } catch (error) {
 
             console.log(
                 "Payment Error:",
                 error
             );
 
-
             alert(
                 "Something went wrong. Please try again."
             );
-
 
             premiumBtn.disabled =
                 false;
 
             premiumBtn.innerText =
                 "💎 Buy Premium Membership";
-
         }
-
     }
 );
-
-
-// PAYMENT VERIFICATION
 
 const urlParams =
     new URLSearchParams(
         window.location.search
     );
 
-
 const orderId =
     urlParams.get("order_id");
-
-
-console.log(
-    "ORDER ID FROM URL:",
-    orderId
-);
-
 
 if (orderId) {
 
@@ -707,45 +593,21 @@ if (orderId) {
                         "token"
                     );
 
-
-                console.log(
-                    "Calling payment verification..."
-                );
-
-
                 const response =
                     await fetch(
                         `/api/payment/verify/${orderId}`,
                         {
-
                             method: "GET",
 
                             headers: {
-
                                 "Authorization":
                                     `Bearer ${currentToken}`
-
                             }
-
                         }
                     );
 
-
-                console.log(
-                    "Verification HTTP Status:",
-                    response.status
-                );
-
-
                 const data =
                     await response.json();
-
-
-                console.log(
-                    "Verification Response:",
-                    data
-                );
-
 
                 if (
                     response.ok &&
@@ -757,7 +619,6 @@ if (orderId) {
                         "Transaction successful"
                     );
 
-
                     const currentUser =
                         JSON.parse(
                             localStorage.getItem(
@@ -765,12 +626,10 @@ if (orderId) {
                             ) || "null"
                         );
 
-
                     if (currentUser) {
 
                         currentUser.isPremium =
                             true;
-
 
                         localStorage.setItem(
                             "user",
@@ -778,12 +637,9 @@ if (orderId) {
                                 currentUser
                             )
                         );
-
                     }
 
-
                     setPremiumBtn();
-
 
                     window.history.replaceState(
                         {},
@@ -791,37 +647,30 @@ if (orderId) {
                         window.location.pathname
                     );
 
-                }
-
-                else if (
-                    data.status === "FAILED"
+                } else if (
+                    data.status ===
+                    "FAILED"
                 ) {
 
                     alert(
                         "TRANSACTION FAILED."
                     );
 
-
                     window.history.replaceState(
                         {},
                         document.title,
                         window.location.pathname
                     );
 
-                }
-
-                else {
+                } else {
 
                     alert(
                         data.message ||
                         "Unable to verify transaction."
                     );
-
                 }
 
-            }
-
-            catch (error) {
+            } catch (error) {
 
                 console.error(
                     "Verification Error:",
@@ -831,193 +680,83 @@ if (orderId) {
                 alert(
                     "Unable to verify transaction."
                 );
-
             }
-
         };
 
-
     verifyPayment();
-
 }
 
+boardBtn.addEventListener(
+    "click",
+    () => {
 
-// INITIAL LOAD
-
-fetchExpenses();
-
-
-
-
-
-
-/* =========================================
-   LEADERBOARD
-========================================= */
-
-const boardBtn = document.getElementById("boardBtn");
-const leaderboardOverlay = document.getElementById("leaderboardOverlay");
-const closeLeaderboard = document.getElementById("closeLeaderboard");
-
-const leaderboardList = document.getElementById("leaderboardList");
-const leaderboardTotal = document.getElementById("leaderboardTotal");
-
-
-/* OPEN LEADERBOARD */
-
-boardBtn.addEventListener("click", () => {
-
-    leaderboardOverlay.classList.add("active");
-
-    loadLeaderboard();
-
-});
-
-
-/* CLOSE LEADERBOARD */
-
-closeLeaderboard.addEventListener("click", () => {
-
-    leaderboardOverlay.classList.remove("active");
-
-});
-
-
-/* CLOSE WHEN CLICKING OUTSIDE */
-
-leaderboardOverlay.addEventListener("click", (event) => {
-
-    if (event.target === leaderboardOverlay) {
-
-        leaderboardOverlay.classList.remove("active");
-
-    }
-
-});
-
-
-/* =========================================
-   LOAD LEADERBOARD
-========================================= */
-
-async function loadLeaderboard() {
-
-    try {
-
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-
-            leaderboardList.innerHTML = `
-                <div class="leaderboard-empty">
-                    <div class="leaderboard-empty-icon">
-                        🔐
-                    </div>
-
-                    <p>Please login first.</p>
-                </div>
-            `;
-
-            return;
-        }
-
-
-        const response = await fetch("/api/expenses", {
-
-            method: "GET",
-
-            headers: {
-
-                "Authorization": `Bearer ${token}`
-
-            }
-
-        });
-
-
-        const data = await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.message || "Failed to load expenses"
-            );
-
-        }
-
-
-        /*
-         * Depending on your backend response,
-         * expenses may directly be data or data.expenses.
-         */
-
-        const expenses = Array.isArray(data)
-            ? data
-            : data.expenses || [];
-
-
-        renderLeaderboard(expenses);
-
-
-    } catch (error) {
-
-        console.error(
-            "Leaderboard error:",
-            error
+        leaderboardOverlay.classList.add(
+            "active"
         );
 
-
-        leaderboardList.innerHTML = `
-            <div class="leaderboard-empty">
-
-                <div class="leaderboard-empty-icon">
-                    ⚠️
-                </div>
-
-                <p>
-                    Unable to load expenses.
-                </p>
-
-            </div>
-        `;
-
+        renderLeaderboard();
     }
+);
 
-}
+closeLeaderboard.addEventListener(
+    "click",
+    () => {
 
+        leaderboardOverlay.classList.remove(
+            "active"
+        );
+    }
+);
 
-/* =========================================
-   RENDER LEADERBOARD
-========================================= */
+leaderboardOverlay.addEventListener(
+    "click",
+    (event) => {
 
-function renderLeaderboard(expenses) {
+        if (
+            event.target ===
+            leaderboardOverlay
+        ) {
+
+            leaderboardOverlay.classList.remove(
+                "active"
+            );
+        }
+    }
+);
+
+function renderLeaderboard() {
 
     leaderboardList.innerHTML = "";
 
+    const total =
+        expenses.reduce(
+            (sum, expense) => {
 
-    /* TOTAL */
-
-    const total = expenses.reduce(
-        (sum, expense) => {
-
-            return sum + Number(expense.amount || 0);
-
-        },
-        0
-    );
-
+                return (
+                    sum +
+                    Number(
+                        expense.amount || 0
+                    )
+                );
+            },
+            0
+        );
 
     leaderboardTotal.textContent =
-        total.toLocaleString("en-IN");
+        `${total.toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        )}`;
 
-
-    /* EMPTY */
-
-    if (expenses.length === 0) {
+    if (
+        !expenses ||
+        expenses.length === 0
+    ) {
 
         leaderboardList.innerHTML = `
-
             <div class="leaderboard-empty">
 
                 <div class="leaderboard-empty-icon">
@@ -1033,125 +772,126 @@ function renderLeaderboard(expenses) {
                 </p>
 
             </div>
-
         `;
 
         return;
     }
 
+    expenses.forEach(
+        (expense, index) => {
 
-    /* EXPENSES */
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-    expenses.forEach((expense, index) => {
+            item.className =
+                "leaderboard-item";
 
-        const item =
-            document.createElement("div");
+            const left =
+                document.createElement(
+                    "div"
+                );
 
+            left.className =
+                "leaderboard-item-left";
 
-        item.className =
-            "leaderboard-item";
+            const description =
+                document.createElement(
+                    "div"
+                );
 
+            description.className =
+                "leaderboard-description";
 
-        const left =
-            document.createElement("div");
+            description.textContent =
+                `${index + 1}. ${
+                    expense.description || "Expense"
+                }`;
 
+            const category =
+                document.createElement(
+                    "span"
+                );
 
-        left.className =
-            "leaderboard-item-left";
+            category.className =
+                "leaderboard-category";
 
+            category.textContent =
+                expense.category ||
+                "Other";
 
-        const description =
-            document.createElement("div");
+            const date =
+                document.createElement(
+                    "div"
+                );
 
+            date.className =
+                "leaderboard-date";
 
-        description.className =
-            "leaderboard-description";
+            date.textContent =
+                formatLeaderboardDate(
+                    expense.createdAt
+                );
 
-
-        description.textContent =
-            `${index + 1}. ${expense.description}`;
-
-
-        const category =
-            document.createElement("span");
-
-
-        category.className =
-            "leaderboard-category";
-
-
-        category.textContent =
-            expense.category || "Other";
-
-
-        const date =
-            document.createElement("div");
-
-
-        date.className =
-            "leaderboard-date";
-
-
-        date.textContent =
-            formatLeaderboardDate(
-                expense.createdAt
+            left.appendChild(
+                description
             );
 
+            left.appendChild(
+                category
+            );
 
-        left.appendChild(description);
+            left.appendChild(
+                date
+            );
 
-        left.appendChild(category);
+            const amount =
+                document.createElement(
+                    "div"
+                );
 
-        left.appendChild(date);
+            amount.className =
+                "leaderboard-amount";
 
+            amount.textContent =
+                `₹${Number(
+                    expense.amount || 0
+                ).toLocaleString(
+                    "en-IN",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                )}`;
 
-        const amount =
-            document.createElement("div");
+            item.appendChild(left);
 
+            item.appendChild(amount);
 
-        amount.className =
-            "leaderboard-amount";
-
-
-        amount.textContent =
-            `₹${Number(expense.amount || 0)
-                .toLocaleString("en-IN")}`;
-
-
-        item.appendChild(left);
-
-        item.appendChild(amount);
-
-
-        leaderboardList.appendChild(item);
-
-    });
-
+            leaderboardList.appendChild(
+                item
+            );
+        }
+    );
 }
-
-
-/* =========================================
-   DATE FORMAT
-========================================= */
 
 function formatLeaderboardDate(date) {
 
     if (!date) {
-
         return "";
-
     }
 
+    const d =
+        new Date(date);
 
-    const d = new Date(date);
-
-
-    if (isNaN(d.getTime())) {
-
+    if (
+        isNaN(
+            d.getTime()
+        )
+    ) {
         return "";
-
     }
-
 
     return d.toLocaleDateString(
         "en-IN",
@@ -1161,5 +901,17 @@ function formatLeaderboardDate(date) {
             year: "numeric"
         }
     );
-
 }
+
+function escapeHTML(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
+}
+
+fetchExpenses();
