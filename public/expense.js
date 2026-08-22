@@ -845,3 +845,321 @@ if (orderId) {
 // INITIAL LOAD
 
 fetchExpenses();
+
+
+
+
+
+
+/* =========================================
+   LEADERBOARD
+========================================= */
+
+const boardBtn = document.getElementById("boardBtn");
+const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+const closeLeaderboard = document.getElementById("closeLeaderboard");
+
+const leaderboardList = document.getElementById("leaderboardList");
+const leaderboardTotal = document.getElementById("leaderboardTotal");
+
+
+/* OPEN LEADERBOARD */
+
+boardBtn.addEventListener("click", () => {
+
+    leaderboardOverlay.classList.add("active");
+
+    loadLeaderboard();
+
+});
+
+
+/* CLOSE LEADERBOARD */
+
+closeLeaderboard.addEventListener("click", () => {
+
+    leaderboardOverlay.classList.remove("active");
+
+});
+
+
+/* CLOSE WHEN CLICKING OUTSIDE */
+
+leaderboardOverlay.addEventListener("click", (event) => {
+
+    if (event.target === leaderboardOverlay) {
+
+        leaderboardOverlay.classList.remove("active");
+
+    }
+
+});
+
+
+/* =========================================
+   LOAD LEADERBOARD
+========================================= */
+
+async function loadLeaderboard() {
+
+    try {
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+
+            leaderboardList.innerHTML = `
+                <div class="leaderboard-empty">
+                    <div class="leaderboard-empty-icon">
+                        🔐
+                    </div>
+
+                    <p>Please login first.</p>
+                </div>
+            `;
+
+            return;
+        }
+
+
+        const response = await fetch("/api/expenses", {
+
+            method: "GET",
+
+            headers: {
+
+                "Authorization": `Bearer ${token}`
+
+            }
+
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message || "Failed to load expenses"
+            );
+
+        }
+
+
+        /*
+         * Depending on your backend response,
+         * expenses may directly be data or data.expenses.
+         */
+
+        const expenses = Array.isArray(data)
+            ? data
+            : data.expenses || [];
+
+
+        renderLeaderboard(expenses);
+
+
+    } catch (error) {
+
+        console.error(
+            "Leaderboard error:",
+            error
+        );
+
+
+        leaderboardList.innerHTML = `
+            <div class="leaderboard-empty">
+
+                <div class="leaderboard-empty-icon">
+                    ⚠️
+                </div>
+
+                <p>
+                    Unable to load expenses.
+                </p>
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================================
+   RENDER LEADERBOARD
+========================================= */
+
+function renderLeaderboard(expenses) {
+
+    leaderboardList.innerHTML = "";
+
+
+    /* TOTAL */
+
+    const total = expenses.reduce(
+        (sum, expense) => {
+
+            return sum + Number(expense.amount || 0);
+
+        },
+        0
+    );
+
+
+    leaderboardTotal.textContent =
+        total.toLocaleString("en-IN");
+
+
+    /* EMPTY */
+
+    if (expenses.length === 0) {
+
+        leaderboardList.innerHTML = `
+
+            <div class="leaderboard-empty">
+
+                <div class="leaderboard-empty-icon">
+                    💸
+                </div>
+
+                <p>
+                    No expenses yet.
+                </p>
+
+                <p>
+                    Add your first expense!
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    /* EXPENSES */
+
+    expenses.forEach((expense, index) => {
+
+        const item =
+            document.createElement("div");
+
+
+        item.className =
+            "leaderboard-item";
+
+
+        const left =
+            document.createElement("div");
+
+
+        left.className =
+            "leaderboard-item-left";
+
+
+        const description =
+            document.createElement("div");
+
+
+        description.className =
+            "leaderboard-description";
+
+
+        description.textContent =
+            `${index + 1}. ${expense.description}`;
+
+
+        const category =
+            document.createElement("span");
+
+
+        category.className =
+            "leaderboard-category";
+
+
+        category.textContent =
+            expense.category || "Other";
+
+
+        const date =
+            document.createElement("div");
+
+
+        date.className =
+            "leaderboard-date";
+
+
+        date.textContent =
+            formatLeaderboardDate(
+                expense.createdAt
+            );
+
+
+        left.appendChild(description);
+
+        left.appendChild(category);
+
+        left.appendChild(date);
+
+
+        const amount =
+            document.createElement("div");
+
+
+        amount.className =
+            "leaderboard-amount";
+
+
+        amount.textContent =
+            `₹${Number(expense.amount || 0)
+                .toLocaleString("en-IN")}`;
+
+
+        item.appendChild(left);
+
+        item.appendChild(amount);
+
+
+        leaderboardList.appendChild(item);
+
+    });
+
+}
+
+
+/* =========================================
+   DATE FORMAT
+========================================= */
+
+function formatLeaderboardDate(date) {
+
+    if (!date) {
+
+        return "";
+
+    }
+
+
+    const d = new Date(date);
+
+
+    if (isNaN(d.getTime())) {
+
+        return "";
+
+    }
+
+
+    return d.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
