@@ -1,5 +1,6 @@
 const Expense = require("../modules/Expense");
 const { redisClient } = require("../config/redis");
+const {googleGenAi} = require("../controllers/genaiController");
 
 
 // Create expense
@@ -8,11 +9,17 @@ const createExpenses = async (req, res) => {
 
     const {
         amount,
-        description,
-        category
+        description
     } = req.body;
 
+    console.log("description: ", description);
+
+
     try {
+
+        const category = await googleGenAi(description);
+
+        console.log("Ai gen Category: ", category);
 
         const expense = await Expense.create({
 
@@ -248,11 +255,7 @@ const deleteExpenses = async (req, res) => {
 
 
 module.exports = {
-
     createExpenses,
-
     showExpenses,
-
     deleteExpenses
-
 };
