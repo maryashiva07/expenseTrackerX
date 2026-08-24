@@ -24,6 +24,14 @@ const User = sequelize.define("User", {
       isPremium:{
            type: DataTypes.BOOLEAN,
            defaultValue: false
+      },
+      resetToken:{
+           type: DataTypes.TEXT,
+           allowNull: true,
+      },
+      resetTokenExpiry:{
+           type: DataTypes.DATE,
+           allowNull: true
       }
 });
 
