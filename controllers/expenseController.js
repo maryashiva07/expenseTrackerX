@@ -1,6 +1,8 @@
 const Expense = require("../modules/Expense");
 const { redisClient } = require("../config/redis");
 const {googleGenAi} = require("../controllers/genaiController");
+const ExpenseHistory = require("../modules/ExpenseHistory");
+const sequelize = require("../config/database");
 
 
 // Create expense
@@ -12,10 +14,12 @@ const createExpenses = async (req, res) => {
         description
     } = req.body;
 
-    console.log("description: ", description);
+    let transaction;
 
 
     try {
+
+        transaction = await sequelize.transaction();
 
         const category = await googleGenAi(description);
 
@@ -27,9 +31,27 @@ const createExpenses = async (req, res) => {
             description,
             category,
 
-            userId: req.user.id
+            userId: req.user.id,
+           },
+           {
+               transaction
+           }
+        
+        );
 
-        });
+        const expenseHistory = await ExpenseHistory.create(
+            {
+                amount,
+                description,
+                category,
+                userId: req.user.id
+            },
+            {
+                transaction
+            }
+        );
+
+        await transaction.commit();
 
 
         const cacheKey =
@@ -56,13 +78,21 @@ const createExpenses = async (req, res) => {
                 category:
                     expense.category
 
-            }
+            },
+
+            expenseHistory
 
         });
 
     }
 
     catch (err) {
+
+        console.error("Create Expense Error: ", err);
+
+        if(transaction){
+             await transaction.rollback();
+        }
 
         res.status(500).json({
 
@@ -75,6 +105,35 @@ const createExpenses = async (req, res) => {
 
     }
 
+};
+
+
+//Get History Data
+
+const getHistoryData = async (req, res) =>{
+      const userId = req.user.id;
+
+     try{
+           const historyData = await ExpenseHistory.findAll({
+                 where:{
+                     userId: userId
+                 },
+                 order:[
+                    ["createdAt", "DESC"]
+                 ]
+           });
+
+           res.status(200).json({
+              message: "Expense Fetched Successfully",
+              historyData
+           })
+     }
+     catch(err){
+        res.status(500).json({
+              message: "Error on fetching expenses",
+              err: err.message
+        })
+     }
 };
 
 
@@ -256,6 +315,7 @@ const deleteExpenses = async (req, res) => {
 
 module.exports = {
     createExpenses,
+    getHistoryData,
     showExpenses,
     deleteExpenses
 };

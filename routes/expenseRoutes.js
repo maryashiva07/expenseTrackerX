@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
-const {createExpenses, showExpenses, deleteExpenses} = require("../controllers/expenseController");
+const {createExpenses, getHistoryData,  showExpenses, deleteExpenses} = require("../controllers/expenseController");
 
 
 //post routes
 
 router.post("/expenses", authMiddleware, createExpenses);
+
+router.get("/history", authMiddleware, getHistoryData);
 
 router.get("/expenses", authMiddleware, showExpenses);
 
