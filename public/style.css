@@ -466,8 +466,10 @@ body.dark-theme .leaderboard-empty {
 
 .total-card strong {
   font-size: 25px;
-  line-height: 30px;
-  color: #667eea;
+    line-height: 30px;
+    color: #667eea;
+    display: flex;
+    gap: 5px;
 }
 
 .expense-form-card,
@@ -904,6 +906,33 @@ footer {
 .leaderboard-empty p {
   margin: 5px 0;
   font-size: 14px;
+}
+
+.leaderboard-income {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.leaderboard-expense {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.files{
+  display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6em;
+}
+
+.files button{
+   padding: 5px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    border: 2px solid black;
+    background: cyan;
+    cursor: pointer;
 }
 
 @media (max-width: 1100px) {
@@ -1629,4 +1658,350 @@ footer {
   .leaderboard-total strong {
     font-size: 15px;
   }
+}
+
+
+
+
+
+
+/* =========================================
+   EXTRA MOBILE FIX
+   For very small mobile screens
+========================================= */
+
+@media (max-width: 500px) {
+
+    body {
+        width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    .dashboard {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* ================= HEADER ================= */
+
+    .header {
+        width: 100%;
+        min-height: 60px;
+        padding: 8px 10px;
+        gap: 5px;
+    }
+
+    .brand {
+        flex: 1;
+        min-width: 0;
+        gap: 5px;
+    }
+
+    .board {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 18px;
+    }
+
+    .brand-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    .brand h1 {
+        font-size: 13px;
+        line-height: 15px;
+    }
+
+    .brand p {
+        display: none;
+    }
+
+    .user-section {
+        gap: 3px;
+        flex-shrink: 0;
+    }
+
+    .premium-btn,
+    .logout-btn,
+    #themeToggle {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        padding: 0;
+        border-radius: 7px;
+    }
+
+    .premium-btn {
+        font-size: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+    }
+
+    .premium-btn::after {
+        content: "💎";
+        font-size: 12px;
+    }
+
+    .logout-btn {
+        font-size: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .logout-btn::after {
+        content: "↪";
+        font-size: 17px;
+    }
+
+    #themeToggle {
+        font-size: 13px;
+    }
+
+
+    /* ================= MAIN CONTENT ================= */
+
+    .content {
+        width: calc(100% - 20px);
+        max-width: none;
+        padding: 16px 0 25px;
+        margin: 0 auto;
+    }
+
+
+    /* ================= WELCOME ================= */
+
+    .welcome {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .welcome h2 {
+        font-size: 20px;
+        line-height: 24px;
+    }
+
+    .welcome p {
+        margin-top: 4px;
+        font-size: 11px;
+        line-height: 16px;
+    }
+
+
+    /* ================= TOTAL CARD ================= */
+
+    .total-card {
+        width: 100%;
+        min-width: 0;
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .total-card span {
+        font-size: 10px;
+    }
+
+    .total-card strong {
+        font-size: 17px;
+        line-height: 22px;
+    }
+
+
+    /* ================= FORM CARD ================= */
+
+    .expense-form-card {
+        width: 100%;
+        padding: 15px 12px;
+        margin-bottom: 15px;
+        border-radius: 11px;
+    }
+
+    .section-heading {
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .heading-icon {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 8px;
+        font-size: 17px;
+    }
+
+    .section-heading h3 {
+        font-size: 14px;
+        line-height: 17px;
+    }
+
+    .section-heading p {
+        font-size: 9px;
+        line-height: 13px;
+    }
+
+
+    /* ================= FORM ================= */
+
+    .form-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 11px;
+    }
+
+    .form-group {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .form-group:nth-child(2) {
+        grid-column: auto;
+    }
+
+    .form-group label {
+        margin-bottom: 5px;
+        font-size: 11px;
+    }
+
+    input,
+    select {
+        width: 100%;
+        height: 40px;
+        padding: 0 10px;
+        font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .input-wrapper {
+        width: 100%;
+    }
+
+    .input-wrapper input {
+        padding-left: 27px;
+    }
+
+    .currency {
+        left: 10px;
+        font-size: 12px;
+    }
+
+
+    /* ================= ADD BUTTON ================= */
+
+    .add-expense-btn {
+        width: 100%;
+        height: 40px;
+        min-height: 40px;
+        margin-top: 14px;
+        padding: 8px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+
+    /* ================= EXPENSE TABLE ================= */
+
+    .expense-table-card {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .table-header {
+        padding: 12px 10px;
+        gap: 6px;
+    }
+
+    .table-header h3 {
+        font-size: 13px;
+        line-height: 16px;
+    }
+
+    .table-header p {
+        font-size: 9px;
+        line-height: 12px;
+    }
+
+    .expense-count {
+        font-size: 8px;
+        padding: 4px 6px;
+    }
+
+
+    /* ================= LEADERBOARD ================= */
+
+    .leaderboard-panel {
+        width: 94vw;
+        max-width: 340px;
+        padding: 12px;
+    }
+
+    .leaderboard-header {
+        margin-bottom: 12px;
+    }
+
+    .leaderboard-header h2 {
+        font-size: 17px;
+        line-height: 21px;
+    }
+
+    .leaderboard-header p {
+        font-size: 10px;
+    }
+
+    .close-leaderboard {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 15px;
+    }
+
+    .leaderboard-total {
+        padding: 11px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+    }
+
+    .leaderboard-total span {
+        font-size: 10px;
+    }
+
+    .leaderboard-total strong {
+        font-size: 15px;
+    }
+
+    .leaderboard-item {
+        padding: 9px;
+        gap: 7px;
+        border-radius: 9px;
+    }
+
+    .leaderboard-description {
+        font-size: 11px;
+        margin-bottom: 3px;
+    }
+
+    .leaderboard-category {
+        font-size: 9px;
+        padding: 3px 6px;
+    }
+
+    .leaderboard-date {
+        font-size: 9px;
+    }
+
+    .leaderboard-amount {
+        font-size: 11px;
+    }
 }
