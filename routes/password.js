@@ -1,6 +1,7 @@
 const express = require("express");
 const router =  express.Router();
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const brevo = require("../config/brevo");
 
 const User = require("../modules/User");
@@ -90,6 +91,92 @@ router.post("/forgotpassword", async(req, res)=>{
               err: err.message
           })
       }
+});
+
+
+
+router.post("/reset-password/:token", async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword) {
+            return res.status(400).json({
+                message: "New password is required!",
+            });
+        }
+
+        // Verify JWT
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+        // Make sure this token is specifically for password reset
+        if (decoded.purpose !== "password-reset") {
+            return res.status(400).json({
+                message: "Invalid reset token!",
+            });
+        }
+
+        // Find user
+        const user = await User.findOne({
+            where: {
+                id: decoded.id,
+                resetToken: token,
+            },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid or already used reset token!",
+            });
+        }
+
+        // Check database expiry
+        if (
+            !user.resetTokenExpiry ||
+            new Date() > new Date(user.resetTokenExpiry)
+        ) {
+            return res.status(400).json({
+                message: "Reset token has expired!",
+            });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password and clear reset token
+        await user.update({
+            password: hashedPassword,
+            resetToken: null,
+            resetTokenExpiry: null,
+        });
+
+        return res.status(200).json({
+            message: "Password reset successfully!",
+        });
+
+    } catch (err) {
+        console.error("Reset password error:", err);
+
+        if (err.name === "TokenExpiredError") {
+            return res.status(400).json({
+                message: "Reset token has expired!",
+            });
+        }
+
+        if (err.name === "JsonWebTokenError") {
+            return res.status(400).json({
+                message: "Invalid reset token!",
+            });
+        }
+
+        return res.status(500).json({
+            
+            message: "Something went wrong",
+        });
+    }
 });
 
 

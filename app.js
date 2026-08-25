@@ -34,6 +34,20 @@ app.get("/", (req, res)=>{
      res.sendFile(path.join(__dirname, "public", "login.html"));
 })
 
+
+app.get("/reset-password/:token", (req, res) => {
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "reset-password.html"
+        )
+    );
+});
+
+
+
+
 async function startServer(){
    try{
            await sequelize.authenticate();
