@@ -821,7 +821,7 @@ footer {
   padding: 18px;
   border-radius: 14px;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #ea6684, #08060a);
   color: white;
   display: flex;
   justify-content: space-between;
@@ -2004,4 +2004,101 @@ footer {
     .leaderboard-amount {
         font-size: 11px;
     }
+}
+
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+}
+
+.pagination button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.pagination button:hover {
+  background: #f3f4f6;
+}
+
+.pagination button.active {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.leaderboard-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.leaderboard-filter label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.leaderboard-filter select {
+  width: auto;
+  min-width: 105px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+body.dark-theme .pagination button {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+body.dark-theme .pagination button:hover {
+  background: #374151;
+}
+
+body.dark-theme .leaderboard-filter label {
+  color: #9ca3af;
+}
+
+@media (max-width: 430px) {
+  .pagination {
+    gap: 4px;
+    padding: 12px;
+  }
+
+  .pagination button {
+    min-width: 29px;
+    height: 29px;
+    font-size: 11px;
+  }
+
+  .leaderboard-filter {
+    margin-bottom: 14px;
+  }
+
+  .leaderboard-filter select {
+    height: 34px;
+    min-width: 95px;
+    font-size: 11px;
+  }
 }

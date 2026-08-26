@@ -1,368 +1,244 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Expense Tracker</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-</head>
-
-
-<body>
-
-
+  <body>
     <div class="dashboard">
-
-
-        <!-- =====================================
+      <!-- =====================================
              HEADER
         ====================================== -->
 
-        <header class="header">
+      <header class="header">
+        <!-- BRAND -->
 
+        <div class="brand">
+          <!-- LEADERBOARD BUTTON -->
 
-            <!-- BRAND -->
+          <div
+            class="board"
+            id="boardBtn"
+            aria-label="Open leaderboard"
+            title="Leaderboard"
+          >
+            ☰
+          </div>
 
-            <div class="brand">
+          <!-- LEADERBOARD OVERLAY -->
 
+          <div class="leaderboard-overlay" id="leaderboardOverlay">
+            <div class="leaderboard-panel">
+              <!-- LEADERBOARD HEADER -->
 
-                <!-- LEADERBOARD BUTTON -->
-
-                <div class="board" id="boardBtn" aria-label="Open leaderboard" title="Leaderboard">
-                    ☰
-                </div>
-
-
-                <!-- LEADERBOARD OVERLAY -->
-
-                <div class="leaderboard-overlay" id="leaderboardOverlay">
-
-                    <div class="leaderboard-panel">
-
-
-                        <!-- LEADERBOARD HEADER -->
-
-                        <div class="leaderboard-header">
-
-                            <div>
-
-                                <h2>
-                                    💰 Leader Board
-                                </h2>
-
-                                <div class="files">
-
-                                     <p>
-                                       All your expenses
-                                     </p>
-
-                                    <button>download file</button>
-                                </div>   
-
-                            </div>
-
-
-                            <!-- CLOSE BUTTON -->
-
-                            <button id="closeLeaderboard" class="close-leaderboard" aria-label="Close leaderboard">
-                                ✕
-                            </button>
-
-                        </div>
-
-
-                        <!-- TOTAL EXPENSE -->
-
-                        <div class="leaderboard-total">
-
-                            <span>
-                                Total Expense
-                            </span>
-
-                            <strong>
-                                ₹<span id="leaderboardTotal">0</span>
-                            </strong>
-
-                        </div>
-
-
-                        <!-- EXPENSE LIST -->
-
-                        <div class="leaderboard-list" id="leaderboardList">
-
-                            <!-- Expenses will be inserted here -->
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-                <!-- BRAND ICON -->
-
-                <div class="brand-icon">
-                    ₹
-                </div>
-
-
-                <!-- BRAND TEXT -->
-
+              <div class="leaderboard-header">
                 <div>
+                  <h2>💰 Leader Board</h2>
 
-                    <h1>
-                        Expense Tracker
-                    </h1>
+                  <div class="files">
+                    <p>All your expenses</p>
 
-                    <p>
-                        Manage your daily expenses
-                    </p>
-
+                    <button>download file</button>
+                  </div>
                 </div>
 
+                <div class="leaderboard-filter">
+                  <label for="historyFilter">View:</label>
 
+                  <select id="historyFilter">
+                    <option value="all">All</option>
+                    <option value="today">Today</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+
+                <!-- CLOSE BUTTON -->
+
+                <button
+                  id="closeLeaderboard"
+                  class="close-leaderboard"
+                  aria-label="Close leaderboard"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- TOTAL EXPENSE -->
+
+              <div class="leaderboard-total">
+                <span> Total Expense </span>
+
+                <strong> ₹<span id="leaderboardTotal">0</span> </strong>
+              </div>
+
+              <!-- EXPENSE LIST -->
+
+              <div class="leaderboard-list" id="leaderboardList">
+                <!-- Expenses will be inserted here -->
+              </div>
             </div>
+          </div>
 
+          <!-- BRAND ICON -->
 
+          <div class="brand-icon">₹</div>
 
-            <!-- =====================================
+          <!-- BRAND TEXT -->
+
+          <div>
+            <h1>Expense Tracker</h1>
+
+            <p>Manage your daily expenses</p>
+          </div>
+        </div>
+
+        <!-- =====================================
                  USER SECTION
             ====================================== -->
 
-            <div class="user-section">
+        <div class="user-section">
+          <!-- USER INFO -->
 
+          <div class="user-info">
+            <span class="user-avatar"> S </span>
 
-                <!-- USER INFO -->
+            <div>
+              <strong id="username"> User </strong>
 
-                <div class="user-info">
-
-
-                    <span class="user-avatar">
-                        S
-                    </span>
-
-
-                    <div>
-
-                        <strong id="username">
-                            User
-                        </strong>
-
-                        <small id="userEmail">
-                            user@email.com
-                        </small>
-
-                    </div>
-
-
-                </div>
-
-
-
-                <!-- PREMIUM BUTTON -->
-
-                <button id="premiumBtn" class="premium-btn">
-                    💎 Buy Premium Membership
-                </button>
-
-
-
-                <!-- LOGOUT -->
-
-                <button class="logout-btn" id="logoutBtn">
-                    Logout
-                </button>
-
-
-
-                <!-- THEME -->
-
-                <button id="themeToggle" aria-label="Toggle theme">
-                    🌞
-                </button>
-
-
+              <small id="userEmail"> user@email.com </small>
             </div>
+          </div>
 
+          <!-- PREMIUM BUTTON -->
 
-        </header>
+          <button id="premiumBtn" class="premium-btn">
+            💎 Buy Premium Membership
+          </button>
 
+          <!-- LOGOUT -->
 
+          <button class="logout-btn" id="logoutBtn">Logout</button>
 
+          <!-- THEME -->
 
-        <!-- =====================================
+          <button id="themeToggle" aria-label="Toggle theme">🌞</button>
+        </div>
+      </header>
+
+      <!-- =====================================
              MAIN CONTENT
         ====================================== -->
 
-        <main class="content">
-
-
-
-            <!-- =================================
+      <main class="content">
+        <!-- =================================
                  WELCOME SECTION
             ================================== -->
 
-            <section class="welcome">
+        <section class="welcome">
+          <div>
+            <h2>Daily Expenses / Incomes</h2>
 
+            <p>Keep track of where your money goes.</p>
+          </div>
 
-                <div>
+          <!-- TOTAL CARD -->
 
-                    <h2>
-                        Daily Expenses / Incomes
-                    </h2>
+          <div class="total-card">
+            <span> Total Expenses </span>
 
-                    <p>
-                        Keep track of where your money goes.
-                    </p>
+            <strong> ₹<span id="totalExpense">0</span> </strong>
 
-                </div>
+            <hr />
+            <br />
 
+            <span>Your Incomes</span>
+            <strong> ₹<span id="totalIncome">0</span> </strong>
+          </div>
+        </section>
 
-
-                <!-- TOTAL CARD -->
-
-                <div class="total-card">
-
-                    <span>
-                        Total Expenses
-                    </span>
-
-                    <strong>
-                        ₹<span id="totalExpense">0</span>
-                    </strong>
-
-                    <hr/><br>
-
-                    <span>Your Incomes</span>
-                    <strong>
-                         ₹<span id="totalIncome">0</span>
-                    </strong>
-
-                </div>
-
-
-            </section>
-
-
-
-
-            <!-- =================================
+        <!-- =================================
                  ADD EXPENSE FORM
             ================================== -->
 
-            <section class="expense-form-card">
+        <section class="expense-form-card">
+          <!-- SECTION HEADING -->
 
+          <div class="section-heading">
+            <div class="heading-icon">+</div>
 
-                <!-- SECTION HEADING -->
+            <div>
+              <h3>Add New Expense / Income</h3>
 
-                <div class="section-heading">
+              <p>Enter the details of your expense / income</p>
+            </div>
+          </div>
 
+          <!-- FORM -->
 
-                    <div class="heading-icon">
-                        +
-                    </div>
-
-
-                    <div>
-
-                        <h3>
-                            Add New Expense / Income
-                        </h3>
-
-                        <p>
-                            Enter the details of your expense / income
-                        </p>
-
-                    </div>
-
-
-                </div>
-
-
-
-                <!-- FORM -->
-
-                <form id="expenseForm">
-
-
-                    <div class="form-grid">
-
-
-                        <!-- =========================
+          <form id="expenseForm">
+            <div class="form-grid">
+              <!-- =========================
                              AMOUNT
                         ========================== -->
 
-                        <div class="form-group">
+              <div class="form-group">
+                <label for="amount"> Amount </label>
 
+                <div class="input-wrapper">
+                  <span class="currency"> ₹ </span>
 
-                            <label for="amount">
-                                Amount
-                            </label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    placeholder="Enter amount"
+                    min="1"
+                    required
+                  />
+                </div>
+              </div>
 
-
-                            <div class="input-wrapper">
-
-
-                                <span class="currency">
-                                    ₹
-                                </span>
-
-
-                                <input type="number" id="amount" name="amount" placeholder="Enter amount" min="1"
-                                    required>
-
-
-                            </div>
-
-
-                        </div>
-
-
-
-                        <!-- =========================
+              <!-- =========================
                              DESCRIPTION
                         ========================== -->
 
-                        <div class="form-group">
+              <div class="form-group">
+                <label for="description"> Description </label>
 
+                <input
+                  type="text"
+                  id="description"
+                  name="description"
+                  placeholder="What did you spend on?"
+                  required
+                />
+              </div>
 
-                            <label for="description">
-                                Description
-                            </label>
-
-
-                            <input type="text" id="description" name="description" placeholder="What did you spend on?"
-                                required>
-
-
-                        </div>
-
-
-
-                        <!-- =========================
+              <!-- =========================
                              CATEGORY
                         ========================== -->
 
-                        <div class="form-group">
+              <div class="form-group">
+                <label for="category"> Category </label>
 
+                <input
+                  type="text"
+                  id="category"
+                  name="category"
+                  placeholder="AI will categorize this"
+                  readonly
+                />
 
-                            <label for="category">
-                                Category
-                            </label>
+                <small id="aiStatus"></small>
 
-                            <input type="text" id="category" name="category" placeholder="AI will categorize this"
-                                readonly>
-
-                            <small id="aiStatus"></small>
-
-                            <!-- <select
+                <!-- <select
                                 id="category"
                                 name="category"
                                 required
@@ -425,190 +301,88 @@
 
 
                             </select> -->
+              </div>
+            </div>
 
+            <!-- ADD EXPENSE BUTTON -->
 
-                        </div>
+            <button type="submit" class="add-expense-btn">
+              <span> + </span>
 
+              Add
+            </button>
+          </form>
+        </section>
 
-                    </div>
-
-
-
-                    <!-- ADD EXPENSE BUTTON -->
-
-                    <button type="submit" class="add-expense-btn">
-
-                        <span>
-                            +
-                        </span>
-
-                        Add 
-
-                    </button>
-
-
-                </form>
-
-
-            </section>
-
-
-
-
-            <!-- =================================
+        <!-- =================================
                  EXPENSE TABLE
             ================================== -->
 
-            <section class="expense-table-card">
+        <section class="expense-table-card">
+          <!-- TABLE HEADER -->
 
+          <div class="table-header">
+            <div>
+              <h3>Recent Expenses</h3>
 
-                <!-- TABLE HEADER -->
+              <p>Your latest transactions</p>
+            </div>
 
-                <div class="table-header">
+            <span class="expense-count" id="expenseCount"> 0 expenses </span>
+          </div>
 
+          <!-- TABLE CONTAINER -->
 
-                    <div>
+          <div class="table-container">
+            <table>
+              <!-- TABLE HEAD -->
 
-                        <h3>
-                            Recent Expenses
-                        </h3>
+              <thead>
+                <tr>
+                  <th>#</th>
 
-                        <p>
-                            Your latest transactions
-                        </p>
+                  <th>Description</th>
 
+                  <th>Category</th>
+
+                  <th>Date</th>
+
+                  <th>Amount</th>
+
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <!-- TABLE BODY -->
+
+              <tbody id="expenseTableBody">
+                <!-- EMPTY STATE -->
+
+                <tr class="empty-row">
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <div class="empty-icon">₹</div>
+
+                      <h4>No expenses yet</h4>
+
+                      <p>Add your first expense using the form above.</p>
                     </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
 
-
-                    <span class="expense-count" id="expenseCount">
-                        0 expenses
-                    </span>
-
-
-                </div>
-
-
-
-
-                <!-- TABLE CONTAINER -->
-
-                <div class="table-container">
-
-
-                    <table>
-
-
-                        <!-- TABLE HEAD -->
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    #
-                                </th>
-
-                                <th>
-                                    Description
-                                </th>
-
-                                <th>
-                                    Category
-                                </th>
-
-                                <th>
-                                    Date
-                                </th>
-
-                                <th>
-                                    Amount
-                                </th>
-
-                                <th>
-                                    Action
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-
-                        <!-- TABLE BODY -->
-
-                        <tbody id="expenseTableBody">
-
-
-                            <!-- EMPTY STATE -->
-
-                            <tr class="empty-row">
-
-
-                                <td colspan="6">
-
-
-                                    <div class="empty-state">
-
-
-                                        <div class="empty-icon">
-                                            ₹
-                                        </div>
-
-
-                                        <h4>
-                                            No expenses yet
-                                        </h4>
-
-
-                                        <p>
-                                            Add your first expense
-                                            using the form above.
-                                        </p>
-
-
-                                    </div>
-
-
-                                </td>
-
-
-                            </tr>
-
-
-                        </tbody>
-
-
-                    </table>
-
-
-                </div>
-
-
-            </section>
-
-
-        </main>
-
-
-
-
-        <!-- =====================================
+      <!-- =====================================
              FOOTER
         ====================================== -->
 
-        <footer>
-
-            <p>
-                © 2026 Expense Tracker
-            </p>
-
-        </footer>
-
-
+      <footer>
+        <p>© 2026 Expense Tracker</p>
+      </footer>
     </div>
-
-
-
 
     <!-- =====================================
          CASHFREE SDK
@@ -616,14 +390,10 @@
 
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
-
     <!-- =====================================
          EXPENSE JS
     ====================================== -->
 
     <script src="expense.js"></script>
-
-
-</body>
-
+  </body>
 </html>

@@ -1,972 +1,431 @@
-// const API_URL = "/api";
-
-// const cashfree = Cashfree({
-//   mode: "sandbox",
-// });
-
-// const token = localStorage.getItem("token");
-
-// const user = JSON.parse(localStorage.getItem("user") || "null");
-
-// if (!token) {
-//   window.location.href = "login.html";
-// }
-
-// // let expenses = [];
-// // let historyExpenses = [];
-
-// const expenseForm = document.getElementById("expenseForm");
-
-// const expenseTableBody = document.getElementById("expenseTableBody");
-
-// const totalExpense = document.getElementById("totalExpense");
-
-// const totalIncome = document.getElementById("totalIncome");
-
-// const expenseCount = document.getElementById("expenseCount");
-
-// const username = document.getElementById("username");
-
-// const userEmail = document.getElementById("userEmail");
-
-// const logoutBtn = document.getElementById("logoutBtn");
-
-// const premiumBtn = document.getElementById("premiumBtn");
-
-// const boardBtn = document.getElementById("boardBtn");
-
-// const leaderboardOverlay = document.getElementById("leaderboardOverlay");
-
-// const closeLeaderboard = document.getElementById("closeLeaderboard");
-
-// const leaderboardList = document.getElementById("leaderboardList");
-
-// const leaderboardTotal = document.getElementById("leaderboardTotal");
-
-// const categoryInput = document.getElementById("category");
-
-// const aiStatus = document.getElementById("aiStatus");
-
-// if (user) {
-//   username.textContent = user.name || "User";
-//   userEmail.textContent = user.email || "";
-// }
-
-// // Makes the premium button show premium membership status
-// function setPremiumBtn() {
-//   if (!premiumBtn) return;
-
-//   premiumBtn.textContent = "👑 Premium Member";
-
-//   premiumBtn.disabled = true;
-
-//   premiumBtn.style.opacity = "0.7";
-
-//   premiumBtn.style.cursor = "not-allowed";
-// }
-
-// if (user && user.isPremium === true) {
-//   setPremiumBtn();
-// } else {
-//   if (boardBtn) {
-//     boardBtn.style.display = "none";
-//   }
-
-//   if (leaderboardOverlay) {
-//     leaderboardOverlay.classList.remove("active");
-//   }
-// }
-
-// // Logs the user out and clears authentication data
-// logoutBtn.addEventListener("click", () => {
-//   localStorage.removeItem("token");
-
-//   localStorage.removeItem("user");
-
-//   window.location.href = "login.html";
-// });
-
-// // Adds a new expense and lets the backend AI generate its category
-// expenseForm.addEventListener("submit", async (event) => {
-//   event.preventDefault();
-
-//   const amount = Number(document.getElementById("amount").value);
-
-//   const description = document.getElementById("description").value.trim();
-
-//   if (!description) {
-//     alert("Please enter expense description");
-
-//     return;
-//   }
-
-//   if (aiStatus) {
-//     aiStatus.textContent = "✨ AI is categorizing your expense...";
-//   }
-
-//   try {
-//     const data = {
-//       amount,
-
-//       description,
-//     };
-
-//     const response = await fetch(`${API_URL}/expenses`, {
-//       method: "POST",
-
-//       headers: {
-//         "Content-Type": "application/json",
-
-//         Authorization: `Bearer ${token}`,
-//       },
-
-//       body: JSON.stringify(data),
-//     });
-
-//     const result = await response.json();
-
-//     if (!response.ok) {
-//       if (aiStatus) {
-//         aiStatus.textContent = "";
-//       }
-
-//       alert(result.message || "Failed to add expense");
-
-//       return;
-//     }
-
-//     const generatedCategory =
-//       result.expense?.category || result.expenses?.category || "Other";
-
-//     if (categoryInput) {
-//       categoryInput.value = generatedCategory;
-//     }
-
-//     if (aiStatus) {
-//       aiStatus.textContent = `✨ AI categorized as ${generatedCategory}`;
-//     }
-
-//     alert(result.message || "Expense added successfully!");
-
-//     expenseForm.reset();
-
-//     if (categoryInput) {
-//       categoryInput.value = generatedCategory;
-//     }
-
-//     await fetchExpenses();
-
-//     await fetchExpenseHistory();
-//   } catch (error) {
-//     console.error("Add Expense Error:", error);
-
-//     if (aiStatus) {
-//       aiStatus.textContent = "";
-//     }
-
-//     alert("Server error. Please try again.");
-//   }
-// });
-
-// // Fetches current expenses belonging to the logged-in user
-// async function fetchExpenses() {
-//   try {
-//     const response = await fetch(`${API_URL}/expenses`, {
-//       method: "GET",
-
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     const result = await response.json();
-
-//     if (!response.ok) {
-//       alert(result.message || "Failed to fetch expenses");
-
-//       return;
-//     }
-
-//     expenses = Array.isArray(result) ? result : result.expenses || [];
-
-//     displayExpenses();
-//   } catch (error) {
-//     console.error("Fetch Expenses Error:", error);
-//   }
-// }
-
-// // Fetches all historical expenses for the dashboard
-// async function fetchExpenseHistory() {
-//   try {
-//     const response = await fetch(`${API_URL}/history`, {
-//       method: "GET",
-
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     const result = await response.json();
-
-//     console.log(result.category.salary);
-
-//     if (!response.ok) {
-//       console.error("History fetch failed:", result.message);
-
-//       return;
-//     }
-
-//     historyExpenses = Array.isArray(result) ? result : result.historyData || [];
-
-//     renderLeaderboard();
-//   } catch (error) {
-//     console.error("Fetch History Error:", error);
-//   }
-// }
-
-// // Displays current expenses inside the expense table
-// function displayExpenses() {
-//   expenseTableBody.innerHTML = "";
-
-//   if (!expenses || expenses.length === 0) {
-//     expenseTableBody.innerHTML = `
-//       <tr class="empty-row">
-//         <td colspan="6">
-//           <div class="empty-state">
-
-//             <div class="empty-icon">
-//               ₹
-//             </div>
-
-//             <h4>
-//               No expenses yet
-//             </h4>
-
-//             <p>
-//               Add your first expense
-//               using the form above.
-//             </p>
-
-//           </div>
-//         </td>
-//       </tr>
-//     `;
-
-//     totalExpense.textContent = "0";
-
-//     expenseCount.textContent = "0 expenses";
-
-//     return;
-//   }
-
-//   let total = 0;
-
-//   expenses.forEach((expense, index) => {
-//     total += Number(expense.amount || 0);
-
-//     const row = document.createElement("tr");
-
-//     const date = new Date(expense.createdAt);
-
-//     const month =
-//       date.getMonth() + 1 <= 9
-//         ? "0" + (date.getMonth() + 1)
-//         : date.getMonth() + 1;
-
-//     const newDate = date.getDate() + "/" + month + "/" + date.getFullYear();
-
-//     row.innerHTML = `
-//         <td>
-//           ${index + 1}
-//         </td>
-
-//         <td>
-//           ${escapeHTML(expense.description)}
-//         </td>
-
-//         <td>
-//           ${escapeHTML(expense.category)}
-//         </td>
-
-//         <td>
-//           ${newDate}
-//         </td>
-
-//         <td>
-//           ₹${Number(expense.amount || 0).toFixed(2)}
-//         </td>
-
-//         <td>
-//           <button
-//             class="delete-btn"
-//             onclick="deleteExpense(${expense.id})"
-//           >
-//             Delete
-//           </button>
-//         </td>
-//       `;
-
-//     expenseTableBody.appendChild(row);
-//   });
-
-//   totalExpense.textContent = total.toFixed(2);
-
-//   expenseCount.textContent = `${expenses.length} ${
-//     expenses.length === 1 ? "expense" : "expenses"
-//   }`;
-// }
-
-// // Deletes an expense from the current expense list
-// async function deleteExpense(id) {
-//   const confirmDelete = confirm(
-//     "Are you sure you want to delete this expense?",
-//   );
-
-//   if (!confirmDelete) {
-//     return;
-//   }
-
-//   try {
-//     const response = await fetch(`${API_URL}/expenses/${id}`, {
-//       method: "DELETE",
-
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     const result = await response.json();
-
-//     if (!response.ok) {
-//       alert(result.message || "Failed to delete expense");
-
-//       return;
-//     }
-
-//     alert(result.message || "Expense deleted successfully!");
-
-//     await fetchExpenses();
-
-//     /*
-//       Do not call fetchExpenseHistory()
-//       after delete.
-
-//       Dashboard history must remain unchanged.
-//     */
-//   } catch (error) {
-//     console.error("Delete Expense Error:", error);
-
-//     alert("Server error. Please try again.");
-//   }
-// }
-
-// // Toggles between light and dark theme
-// const themeToggle = document.getElementById("themeToggle");
-
-// const savedTheme = localStorage.getItem("theme");
-
-// if (savedTheme === "dark") {
-//   document.body.classList.add("dark-theme");
-
-//   themeToggle.textContent = "🌙";
-// } else {
-//   themeToggle.textContent = "🌞";
-// }
-
-// themeToggle.addEventListener("click", () => {
-//   document.body.classList.toggle("dark-theme");
-
-//   const isDark = document.body.classList.contains("dark-theme");
-
-//   if (isDark) {
-//     themeToggle.textContent = "🌙";
-
-//     localStorage.setItem("theme", "dark");
-//   } else {
-//     themeToggle.textContent = "🌞";
-
-//     localStorage.setItem("theme", "light");
-//   }
-// });
-
-// // Handles the premium membership payment process
-// premiumBtn.addEventListener("click", async () => {
-//   const phone = prompt("Enter your 10 digit mobile number");
-
-//   if (phone === null) {
-//     return;
-//   }
-
-//   const cleanPhone = phone.trim();
-
-//   if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-//     alert("Please enter a valid 10 digit mobile number");
-
-//     return;
-//   }
-
-//   try {
-//     premiumBtn.disabled = true;
-
-//     premiumBtn.innerText = "Processing...";
-
-//     const currentToken = localStorage.getItem("token");
-
-//     const response = await fetch("/api/payment/create-order", {
-//       method: "POST",
-
-//       headers: {
-//         "Content-Type": "application/json",
-
-//         Authorization: `Bearer ${currentToken}`,
-//       },
-
-//       body: JSON.stringify({
-//         phone: cleanPhone,
-//       }),
-//     });
-
-//     const data = await response.json();
-
-//     if (!response.ok || !data.success) {
-//       alert(data.message || "Unable to create order");
-
-//       premiumBtn.disabled = false;
-
-//       premiumBtn.innerText = "💎 Buy Premium Membership";
-
-//       return;
-//     }
-
-//     await cashfree.checkout({
-//       paymentSessionId: data.paymentSessionId,
-
-//       redirectTarget: "_self",
-//     });
-//   } catch (error) {
-//     console.log("Payment Error:", error);
-
-//     alert("Something went wrong. Please try again.");
-
-//     premiumBtn.disabled = false;
-
-//     premiumBtn.innerText = "💎 Buy Premium Membership";
-//   }
-// });
-
-// const urlParams = new URLSearchParams(window.location.search);
-
-// const orderId = urlParams.get("order_id");
-
-// if (orderId) {
-//   // Verifies the payment after Cashfree redirects back
-//   const verifyPayment = async () => {
-//     try {
-//       const currentToken = localStorage.getItem("token");
-
-//       const response = await fetch(`/api/payment/verify/${orderId}`, {
-//         method: "GET",
-
-//         headers: {
-//           Authorization: `Bearer ${currentToken}`,
-//         },
-//       });
-
-//       const data = await response.json();
-
-//       if (response.ok && data.status === "SUCCESSFUL") {
-//         alert("Transaction successful");
-
-//         const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-
-//         if (currentUser) {
-//           currentUser.isPremium = true;
-
-//           localStorage.setItem("user", JSON.stringify(currentUser));
-//         }
-
-//         setPremiumBtn();
-
-//         if (boardBtn) {
-//           boardBtn.style.display = "flex";
-//         }
-
-//         window.history.replaceState(
-//           {},
-//           document.title,
-//           window.location.pathname,
-//         );
-//       } else if (data.status === "FAILED") {
-//         alert("TRANSACTION FAILED.");
-
-//         window.history.replaceState(
-//           {},
-//           document.title,
-//           window.location.pathname,
-//         );
-//       } else {
-//         alert(data.message || "Unable to verify transaction.");
-//       }
-//     } catch (error) {
-//       console.error("Verification Error:", error);
-
-//       alert("Unable to verify transaction.");
-//     }
-//   };
-
-//   verifyPayment();
-// }
-
-// // Opens the leaderboard for premium users
-// if (boardBtn && user && user.isPremium === true) {
-//   boardBtn.addEventListener("click", async () => {
-//     leaderboardOverlay.classList.add("active");
-
-//     if (!historyExpenses || historyExpenses.length === 0) {
-//       await fetchExpenseHistory();
-//     } else {
-//       renderLeaderboard();
-//     }
-//   });
-// }
-
-// // Closes the leaderboard using the close button
-// if (closeLeaderboard) {
-//   closeLeaderboard.addEventListener("click", () => {
-//     leaderboardOverlay.classList.remove("active");
-//   });
-// }
-
-// // Closes the leaderboard when clicking outside the panel
-// if (leaderboardOverlay) {
-//   leaderboardOverlay.addEventListener("click", (event) => {
-//     if (event.target === leaderboardOverlay) {
-//       leaderboardOverlay.classList.remove("active");
-//     }
-//   });
-// }
-
-// // Renders all historical expenses inside the dashboard
-// function renderLeaderboard() {
-//   if (!leaderboardList) {
-//     return;
-//   }
-
-//   leaderboardList.innerHTML = "";
-
-//   const total = historyExpenses.reduce((sum, expense) => {
-//     return sum + Number(expense.amount || 0);
-//   }, 0);
-
-//   if (leaderboardTotal) {
-//     leaderboardTotal.textContent = total.toLocaleString("en-IN", {
-//       minimumFractionDigits: 2,
-//       maximumFractionDigits: 2,
-//     });
-//   }
-
-//   if (!historyExpenses || historyExpenses.length === 0) {
-//     leaderboardList.innerHTML = `
-//       <div class="leaderboard-empty">
-
-//         <div class="leaderboard-empty-icon">
-//           💸
-//         </div>
-
-//         <p>
-//           No expenses yet.
-//         </p>
-
-//         <p>
-//           Add your first expense!
-//         </p>
-
-//       </div>
-//     `;
-
-//     return;
-//   }
-
-//   historyExpenses.forEach((expense, index) => {
-//     const item = document.createElement("div");
-
-//     item.className = "leaderboard-item";
-
-//     const left = document.createElement("div");
-
-//     left.className = "leaderboard-item-left";
-
-//     const description = document.createElement("div");
-
-//     description.className = "leaderboard-description";
-
-//     description.textContent = `${index + 1}. ${
-//       expense.description || "Expense"
-//     }`;
-
-//     const category = document.createElement("span");
-
-//     category.className = "leaderboard-category";
-
-//     category.textContent = expense.category || "Other";
-
-//     const date = document.createElement("div");
-
-//     date.className = "leaderboard-date";
-
-//     date.textContent = formatLeaderboardDate(expense.createdAt);
-
-//     left.appendChild(description);
-
-//     left.appendChild(category);
-
-//     left.appendChild(date);
-
-//     const amount = document.createElement("div");
-
-//     amount.className = "leaderboard-amount";
-
-//     amount.textContent = `₹${Number(expense.amount || 0).toLocaleString(
-//       "en-IN",
-//       {
-//         minimumFractionDigits: 2,
-//         maximumFractionDigits: 2,
-//       },
-//     )}`;
-
-//     item.appendChild(left);
-
-//     item.appendChild(amount);
-
-//     leaderboardList.appendChild(item);
-//   });
-// }
-
-// // Formats an expense date for the dashboard
-// function formatLeaderboardDate(date) {
-//   if (!date) {
-//     return "";
-//   }
-
-//   const d = new Date(date);
-
-//   if (isNaN(d.getTime())) {
-//     return "";
-//   }
-
-//   return d.toLocaleDateString("en-IN", {
-//     day: "2-digit",
-//     month: "short",
-//     year: "numeric",
-//   });
-// }
-
-// // Escapes HTML characters before displaying user-generated content
-// function escapeHTML(value) {
-//   const div = document.createElement("div");
-
-//   div.textContent = value ?? "";
-
-//   return div.innerHTML;
-// }
-
-// // Loads current and historical data when the page starts
-// async function initializeDashboard() {
-//   await fetchExpenses();
-
-//   if (user && user.isPremium === true) {
-//     await fetchExpenseHistory();
-//   }
-// }
-
-// initializeDashboard();
-
 const API_URL = "/api";
 
 const cashfree = Cashfree({
-  mode: "sandbox",
+    mode: "sandbox"
 });
 
 const token = localStorage.getItem("token");
 
-const user = JSON.parse(localStorage.getItem("user") || "null");
+const user = JSON.parse(
+    localStorage.getItem("user") || "null"
+);
 
 if (!token) {
-  window.location.href = "login.html";
+    window.location.href = "login.html";
 }
 
 let expenses = [];
 let historyExpenses = [];
 
-const expenseForm = document.getElementById("expenseForm");
+const ITEMS_PER_PAGE = 5;
 
-const expenseTableBody = document.getElementById("expenseTableBody");
+let expenseCurrentPage = 1;
+let leaderboardCurrentPage = 1;
 
-const totalExpense = document.getElementById("totalExpense");
+const expenseForm =
+    document.getElementById("expenseForm");
 
-const totalIncome = document.getElementById("totalIncome");
+const expenseTableBody =
+    document.getElementById("expenseTableBody");
 
-const expenseCount = document.getElementById("expenseCount");
+const totalExpense =
+    document.getElementById("totalExpense");
 
-const username = document.getElementById("username");
+const totalIncome =
+    document.getElementById("totalIncome");
 
-const userEmail = document.getElementById("userEmail");
+const expenseCount =
+    document.getElementById("expenseCount");
 
-const logoutBtn = document.getElementById("logoutBtn");
+const username =
+    document.getElementById("username");
 
-const premiumBtn = document.getElementById("premiumBtn");
+const userEmail =
+    document.getElementById("userEmail");
 
-const boardBtn = document.getElementById("boardBtn");
+const logoutBtn =
+    document.getElementById("logoutBtn");
 
-const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+const premiumBtn =
+    document.getElementById("premiumBtn");
 
-const closeLeaderboard = document.getElementById("closeLeaderboard");
+const boardBtn =
+    document.getElementById("boardBtn");
 
-const leaderboardList = document.getElementById("leaderboardList");
+const leaderboardOverlay =
+    document.getElementById("leaderboardOverlay");
 
-const leaderboardTotal = document.getElementById("leaderboardTotal");
+const closeLeaderboard =
+    document.getElementById("closeLeaderboard");
 
-const categoryInput = document.getElementById("category");
+const leaderboardList =
+    document.getElementById("leaderboardList");
 
-const aiStatus = document.getElementById("aiStatus");
+const leaderboardTotal =
+    document.getElementById("leaderboardTotal");
 
-const transactionType = document.getElementById("transactionType");
+const categoryInput =
+    document.getElementById("category");
+
+const aiStatus =
+    document.getElementById("aiStatus");
+
+const transactionType =
+    document.getElementById("transactionType");
+
+const historyFilter =
+    document.getElementById("historyFilter");
 
 if (user) {
-  username.textContent = user.name || "User";
+    username.textContent =
+        user.name || "User";
 
-  userEmail.textContent = user.email || "";
+    userEmail.textContent =
+        user.email || "";
 }
+
 
 // Shows premium membership status
 function setPremiumBtn() {
-  if (!premiumBtn) {
-    return;
-  }
 
-  premiumBtn.textContent = "👑 Premium Member";
+    if (!premiumBtn) {
+        return;
+    }
 
-  premiumBtn.disabled = true;
+    premiumBtn.textContent =
+        "👑 Premium Member";
 
-  premiumBtn.style.opacity = "0.7";
+    premiumBtn.disabled = true;
 
-  premiumBtn.style.cursor = "not-allowed";
+    premiumBtn.style.opacity = "0.7";
+
+    premiumBtn.style.cursor =
+        "not-allowed";
 }
+
 
 // Checks premium status
 function checkPremiumStatus() {
-  if (user && user.isPremium === true) {
-    setPremiumBtn();
-  } else {
-    if (boardBtn) {
-      boardBtn.style.display = "none";
-    }
 
-    if (leaderboardOverlay) {
-      leaderboardOverlay.classList.remove("active");
+    if (
+        user &&
+        user.isPremium === true
+    ) {
+
+        setPremiumBtn();
+
+    } else {
+
+        if (boardBtn) {
+            boardBtn.style.display = "none";
+        }
+
+        if (leaderboardOverlay) {
+            leaderboardOverlay.classList.remove(
+                "active"
+            );
+        }
     }
-  }
 }
 
-checkPremiumStatus();
-
-// Logs the user out
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("token");
-
-  localStorage.removeItem("user");
-
-  window.location.href = "login.html";
-});
 
 // Returns selected transaction type
 function getTransactionType() {
-  if (transactionType) {
-    return (transactionType.value || "expense").toLowerCase();
-  }
 
-  return "expense";
+    if (transactionType) {
+
+        return (
+            transactionType.value ||
+            "expense"
+        ).toLowerCase();
+
+    }
+
+    return "expense";
 }
 
-// Adds a new expense or income
-expenseForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const amount = Number(document.getElementById("amount").value);
-
-  const description = document.getElementById("description").value.trim();
-
-  const type = getTransactionType();
-
-  if (!amount || amount <= 0) {
-    alert("Please enter a valid amount");
-
-    return;
-  }
-
-  if (!description) {
-    alert("Please enter description");
-
-    return;
-  }
-
-  if (aiStatus) {
-    aiStatus.textContent = "✨ AI is categorizing...";
-  }
-
-  try {
-    const data = {
-      amount,
-
-      description,
-
-      type,
-    };
-
-    const response = await fetch(`${API_URL}/expenses`, {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      if (aiStatus) {
-        aiStatus.textContent = "";
-      }
-
-      alert(result.message || "Failed to add transaction");
-
-      return;
-    }
-
-    const generatedCategory =
-      result.expense?.category || result.expenses?.category || "Other";
-
-    if (categoryInput) {
-      categoryInput.value = generatedCategory;
-    }
-
-    if (aiStatus) {
-      aiStatus.textContent = `✨ AI categorized as ${generatedCategory}`;
-    }
-
-    alert(result.message || "Transaction added successfully!");
-
-    expenseForm.reset();
-
-    if (categoryInput) {
-      categoryInput.value = generatedCategory;
-    }
-
-    await fetchExpenses();
-
-    if (user && user.isPremium === true) {
-      await fetchExpenseHistory();
-    }
-  } catch (error) {
-    console.error("Add Transaction Error:", error);
-
-    if (aiStatus) {
-      aiStatus.textContent = "";
-    }
-
-    alert("Server error. Please try again.");
-  }
-});
-
-// Fetches current transactions
-async function fetchExpenses() {
-  try {
-    const response = await fetch(`${API_URL}/expenses`, {
-      method: "GET",
-
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      alert(result.message || "Failed to fetch expenses");
-
-      return;
-    }
-
-    expenses = Array.isArray(result) ? result : result.expenses || [];
-
-    displayExpenses();
-  } catch (error) {
-    console.error("Fetch Expenses Error:", error);
-  }
-}
-
-// Fetches complete history for dashboard
-async function fetchExpenseHistory() {
-  try {
-    const response = await fetch(`${API_URL}/history`, {
-      method: "GET",
-
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      console.error("History fetch failed:", result.message);
-
-      return;
-    }
-
-    historyExpenses = Array.isArray(result) ? result : result.historyData || [];
-
-    renderLeaderboard();
-  } catch (error) {
-    console.error("Fetch History Error:", error);
-  }
-}
 
 // Determines whether transaction is income
 function isIncome(transaction) {
-  const type = String(
-    transaction.type || transaction.transactionType || "",
-  ).toLowerCase();
 
-  if (type === "income") {
-    return true;
-  }
+    const type = String(
+        transaction.type ||
+        transaction.transactionType ||
+        ""
+    ).toLowerCase();
 
-  if (type === "expense") {
-    return false;
-  }
+    if (type === "income") {
+        return true;
+    }
 
-  const category = String(transaction.category || "").toLowerCase();
+    if (type === "expense") {
+        return false;
+    }
 
-  return category === "salary";
+    const category = String(
+        transaction.category || ""
+    ).toLowerCase();
+
+    return category === "salary";
 }
+
+
+// Adds a new expense or income
+async function addTransaction(event) {
+
+    event.preventDefault();
+
+    const amount = Number(
+        document.getElementById("amount").value
+    );
+
+    const description =
+        document
+            .getElementById("description")
+            .value
+            .trim();
+
+    const type =
+        getTransactionType();
+
+    if (!amount || amount <= 0) {
+
+        alert(
+            "Please enter a valid amount"
+        );
+
+        return;
+    }
+
+    if (!description) {
+
+        alert(
+            "Please enter description"
+        );
+
+        return;
+    }
+
+    if (aiStatus) {
+
+        aiStatus.textContent =
+            "✨ AI is categorizing...";
+    }
+
+    try {
+
+        const data = {
+            amount,
+            description,
+            type
+        };
+
+        const response =
+            await fetch(
+                `${API_URL}/expenses`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        Authorization:
+                            `Bearer ${token}`
+                    },
+
+                    body:
+                        JSON.stringify(data)
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            if (aiStatus) {
+                aiStatus.textContent = "";
+            }
+
+            alert(
+                result.message ||
+                "Failed to add transaction"
+            );
+
+            return;
+        }
+
+        const generatedCategory =
+            result.expense?.category ||
+            result.expenses?.category ||
+            "Other";
+
+        if (categoryInput) {
+
+            categoryInput.value =
+                generatedCategory;
+        }
+
+        if (aiStatus) {
+
+            aiStatus.textContent =
+                `✨ AI categorized as ${generatedCategory}`;
+        }
+
+        alert(
+            result.message ||
+            "Transaction added successfully!"
+        );
+
+        expenseForm.reset();
+
+        if (aiStatus) {
+            aiStatus.textContent = "";
+        }
+
+        await fetchExpenses();
+
+        if (
+            user &&
+            user.isPremium === true
+        ) {
+
+            await fetchExpenseHistory();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Add Transaction Error:",
+            error
+        );
+
+        if (aiStatus) {
+            aiStatus.textContent = "";
+        }
+
+        alert(
+            "Server error. Please try again."
+        );
+    }
+}
+
+
+// Fetches current transactions
+async function fetchExpenses() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/expenses`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                result.message ||
+                "Failed to fetch expenses"
+            );
+
+            return;
+        }
+
+        expenses =
+            Array.isArray(result)
+                ? result
+                : result.expenses || [];
+
+        expenseCurrentPage = 1;
+
+        displayExpenses();
+
+    } catch (error) {
+
+        console.error(
+            "Fetch Expenses Error:",
+            error
+        );
+    }
+}
+
+
+// Fetches complete history for dashboard
+async function fetchExpenseHistory() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/history`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            console.error(
+                "History fetch failed:",
+                result.message
+            );
+
+            return;
+        }
+
+        historyExpenses =
+            Array.isArray(result)
+                ? result
+                : result.historyData || [];
+
+        leaderboardCurrentPage = 1;
+
+        renderLeaderboard();
+
+    } catch (error) {
+
+        console.error(
+            "Fetch History Error:",
+            error
+        );
+    }
+}
+
 
 // Displays current transactions
 function displayExpenses() {
-  expenseTableBody.innerHTML = "";
 
-  if (!expenses || expenses.length === 0) {
-    expenseTableBody.innerHTML = `
+    expenseTableBody.innerHTML = "";
+
+    if (
+        !expenses ||
+        expenses.length === 0
+    ) {
+
+        expenseTableBody.innerHTML = `
             <tr class="empty-row">
-
                 <td colspan="6">
-
                     <div class="empty-state">
-
                         <div class="empty-icon">
                             ₹
                         </div>
@@ -979,71 +438,133 @@ function displayExpenses() {
                             Add your first transaction
                             using the form above.
                         </p>
-
                     </div>
-
                 </td>
-
             </tr>
         `;
 
-    totalExpense.textContent = "0";
+        totalExpense.textContent =
+            "0";
+
+        if (totalIncome) {
+            totalIncome.textContent =
+                "0";
+        }
+
+        expenseCount.textContent =
+            "0 transactions";
+
+        renderExpensePagination();
+
+        return;
+    }
+
+    let expenseTotal = 0;
+    let incomeTotal = 0;
+
+    expenses.forEach(
+        (transaction) => {
+
+            const amount =
+                Number(
+                    transaction.amount || 0
+                );
+
+            if (isIncome(transaction)) {
+                incomeTotal += amount;
+            } else {
+                expenseTotal += amount;
+            }
+        }
+    );
+
+    totalExpense.textContent =
+        expenseTotal.toFixed(2);
 
     if (totalIncome) {
-      totalIncome.textContent = "0";
+        totalIncome.textContent =
+            incomeTotal.toFixed(2);
     }
 
-    expenseCount.textContent = "0 transactions";
+    expenseCount.textContent =
+        `${expenses.length} ${
+            expenses.length === 1
+                ? "transaction"
+                : "transactions"
+        }`;
 
-    return;
-  }
+    const start =
+        (expenseCurrentPage - 1) *
+        ITEMS_PER_PAGE;
 
-  let expenseTotal = 0;
-  let incomeTotal = 0;
+    const end =
+        start + ITEMS_PER_PAGE;
 
-  expenses.forEach((transaction, index) => {
-    const amount = Number(transaction.amount || 0);
+    const pageExpenses =
+        expenses.slice(start, end);
 
-    const income = isIncome(transaction);
+    pageExpenses.forEach(
+        (transaction, index) => {
 
-    if (income) {
-      incomeTotal += amount;
-    } else {
-      expenseTotal += amount;
-    }
+            const amount =
+                Number(
+                    transaction.amount || 0
+                );
 
-    const row = document.createElement("tr");
+            const income =
+                isIncome(transaction);
 
-    const date = new Date(transaction.createdAt);
+            const row =
+                document.createElement("tr");
 
-    const month =
-      date.getMonth() + 1 <= 9
-        ? "0" + (date.getMonth() + 1)
-        : date.getMonth() + 1;
+            const date =
+                new Date(
+                    transaction.createdAt
+                );
 
-    const newDate = date.getDate() + "/" + month + "/" + date.getFullYear();
+            const month =
+                date.getMonth() + 1;
 
-    const transactionLabel = income ? "Income" : "Expense";
+            const newDate =
+                date.getDate() +
+                "/" +
+                String(month).padStart(
+                    2,
+                    "0"
+                ) +
+                "/" +
+                date.getFullYear();
 
-    row.innerHTML = `
+            const actualIndex =
+                start + index;
 
+            row.innerHTML = `
                 <td>
-                    ${index + 1}
+                    ${actualIndex + 1}
                 </td>
 
                 <td>
-                    ${escapeHTML(transaction.description)}
+                    ${escapeHTML(
+                        transaction.description
+                    )}
                 </td>
 
                 <td>
-                    ${escapeHTML(transaction.category || "Other")}
+                    ${escapeHTML(
+                        transaction.category ||
+                        "Other"
+                    )}
                 </td>
 
                 <td>
                     ${newDate}
                 </td>
 
-                <td>
+                <td class="${
+                    income
+                        ? "leaderboard-income"
+                        : "leaderboard-expense"
+                }">
                     ${income ? "+" : "-"}₹${amount.toFixed(2)}
                 </td>
 
@@ -1055,431 +576,1213 @@ function displayExpenses() {
                         Delete
                     </button>
                 </td>
-
             `;
 
-    expenseTableBody.appendChild(row);
-  });
+            expenseTableBody.appendChild(row);
+        }
+    );
 
-  totalExpense.textContent = expenseTotal.toFixed(2);
-
-  if (totalIncome) {
-    totalIncome.textContent = incomeTotal.toFixed(2);
-  }
-
-  expenseCount.textContent = `${expenses.length} ${
-    expenses.length === 1 ? "transaction" : "transactions"
-  }`;
+    renderExpensePagination();
 }
 
-// Deletes current transaction
-async function deleteExpense(id) {
-  const confirmDelete = confirm(
-    "Are you sure you want to delete this transaction?",
-  );
 
-  if (!confirmDelete) {
-    return;
-  }
+// Renders current transaction pagination
+function renderExpensePagination() {
 
-  try {
-    const response = await fetch(`${API_URL}/expenses/${id}`, {
-      method: "DELETE",
+    let pagination =
+        document.getElementById(
+            "expensePagination"
+        );
 
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    if (!pagination) {
 
-    const result = await response.json();
+        pagination =
+            document.createElement("div");
 
-    if (!response.ok) {
-      alert(result.message || "Failed to delete transaction");
+        pagination.id =
+            "expensePagination";
 
-      return;
+        pagination.className =
+            "pagination";
+
+        const tableCard =
+            document.querySelector(
+                ".expense-table-card"
+            );
+
+        if (tableCard) {
+            tableCard.appendChild(
+                pagination
+            );
+        }
     }
 
-    alert(result.message || "Transaction deleted successfully!");
+    pagination.innerHTML = "";
 
-    await fetchExpenses();
-  } catch (error) {
-    console.error("Delete Transaction Error:", error);
+    const totalPages =
+        Math.ceil(
+            expenses.length /
+            ITEMS_PER_PAGE
+        );
 
-    alert("Server error. Please try again.");
-  }
-}
-
-// Toggles light and dark theme
-const themeToggle = document.getElementById("themeToggle");
-
-const savedTheme = localStorage.getItem("theme");
-
-if (savedTheme === "dark") {
-  document.body.classList.add("dark-theme");
-
-  themeToggle.textContent = "🌙";
-} else {
-  themeToggle.textContent = "🌞";
-}
-
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark-theme");
-
-  const isDark = document.body.classList.contains("dark-theme");
-
-  if (isDark) {
-    themeToggle.textContent = "🌙";
-
-    localStorage.setItem("theme", "dark");
-  } else {
-    themeToggle.textContent = "🌞";
-
-    localStorage.setItem("theme", "light");
-  }
-});
-
-// Handles premium membership payment
-premiumBtn.addEventListener("click", async () => {
-  const phone = prompt("Enter your 10 digit mobile number");
-
-  if (phone === null) {
-    return;
-  }
-
-  const cleanPhone = phone.trim();
-
-  if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-    alert("Please enter a valid 10 digit mobile number");
-
-    return;
-  }
-
-  try {
-    premiumBtn.disabled = true;
-
-    premiumBtn.innerText = "Processing...";
-
-    const currentToken = localStorage.getItem("token");
-
-    const response = await fetch("/api/payment/create-order", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-
-        Authorization: `Bearer ${currentToken}`,
-      },
-
-      body: JSON.stringify({
-        phone: cleanPhone,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      alert(data.message || "Unable to create order");
-
-      premiumBtn.disabled = false;
-
-      premiumBtn.innerText = "💎 Buy Premium Membership";
-
-      return;
+    if (totalPages <= 1) {
+        return;
     }
 
-    await cashfree.checkout({
-      paymentSessionId: data.paymentSessionId,
+    const previous =
+        document.createElement("button");
 
-      redirectTarget: "_self",
-    });
-  } catch (error) {
-    console.log("Payment Error:", error);
+    previous.textContent = "←";
 
-    alert("Something went wrong. Please try again.");
+    previous.disabled =
+        expenseCurrentPage === 1;
 
-    premiumBtn.disabled = false;
+    previous.onclick = () => {
 
-    premiumBtn.innerText = "💎 Buy Premium Membership";
-  }
-});
+        if (expenseCurrentPage > 1) {
 
-const urlParams = new URLSearchParams(window.location.search);
+            expenseCurrentPage--;
 
-const orderId = urlParams.get("order_id");
+            displayExpenses();
+        }
+    };
 
-if (orderId) {
-  // Verifies Cashfree payment
-  const verifyPayment = async () => {
-    try {
-      const currentToken = localStorage.getItem("token");
+    pagination.appendChild(previous);
 
-      const response = await fetch(`/api/payment/verify/${orderId}`, {
-        method: "GET",
+    for (
+        let page = 1;
+        page <= totalPages;
+        page++
+    ) {
 
-        headers: {
-          Authorization: `Bearer ${currentToken}`,
-        },
-      });
+        const button =
+            document.createElement("button");
 
-      const data = await response.json();
+        button.textContent = page;
 
-      if (response.ok && data.status === "SUCCESSFUL") {
-        alert("Transaction successful");
+        if (
+            page === expenseCurrentPage
+        ) {
 
-        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-
-        if (currentUser) {
-          currentUser.isPremium = true;
-
-          localStorage.setItem("user", JSON.stringify(currentUser));
+            button.classList.add(
+                "active"
+            );
         }
 
-        setPremiumBtn();
+        button.onclick = () => {
 
-        if (boardBtn) {
-          boardBtn.style.display = "flex";
+            expenseCurrentPage =
+                page;
+
+            displayExpenses();
+        };
+
+        pagination.appendChild(
+            button
+        );
+    }
+
+    const next =
+        document.createElement("button");
+
+    next.textContent = "→";
+
+    next.disabled =
+        expenseCurrentPage ===
+        totalPages;
+
+    next.onclick = () => {
+
+        if (
+            expenseCurrentPage <
+            totalPages
+        ) {
+
+            expenseCurrentPage++;
+
+            displayExpenses();
         }
+    };
 
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname,
-        );
-      } else if (data.status === "FAILED") {
-        alert("TRANSACTION FAILED.");
+    pagination.appendChild(next);
+}
 
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname,
-        );
-      } else {
-        alert(data.message || "Unable to verify transaction.");
-      }
-    } catch (error) {
-      console.error("Verification Error:", error);
 
-      alert("Unable to verify transaction.");
+// Filters history according to selected period
+function filterHistoryData() {
+
+    const filter =
+        historyFilter
+            ? historyFilter.value
+            : "all";
+
+    if (filter === "all") {
+        return historyExpenses;
     }
-  };
 
-  verifyPayment();
-}
+    const now =
+        new Date();
 
-// Opens leaderboard only for premium users
-if (boardBtn && user && user.isPremium === true) {
-  boardBtn.addEventListener("click", async () => {
-    leaderboardOverlay.classList.add("active");
+    const todayStart =
+        new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+        );
 
-    await fetchExpenseHistory();
-  });
-}
+    if (filter === "today") {
 
-// Closes leaderboard
-if (closeLeaderboard) {
-  closeLeaderboard.addEventListener("click", () => {
-    leaderboardOverlay.classList.remove("active");
-  });
-}
+        return historyExpenses.filter(
+            (transaction) => {
 
-// Closes leaderboard outside panel
-if (leaderboardOverlay) {
-  leaderboardOverlay.addEventListener("click", (event) => {
-    if (event.target === leaderboardOverlay) {
-      leaderboardOverlay.classList.remove("active");
+                const date =
+                    new Date(
+                        transaction.createdAt
+                    );
+
+                return (
+                    date >= todayStart &&
+                    date <= now
+                );
+            }
+        );
     }
-  });
+
+    if (filter === "weekly") {
+
+        const day =
+            now.getDay();
+
+        const startOfWeek =
+            new Date(now);
+
+        startOfWeek.setDate(
+            now.getDate() - day
+        );
+
+        startOfWeek.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        return historyExpenses.filter(
+            (transaction) => {
+
+                const date =
+                    new Date(
+                        transaction.createdAt
+                    );
+
+                return (
+                    date >= startOfWeek &&
+                    date <= now
+                );
+            }
+        );
+    }
+
+    if (filter === "monthly") {
+
+        const startOfMonth =
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                1
+            );
+
+        return historyExpenses.filter(
+            (transaction) => {
+
+                const date =
+                    new Date(
+                        transaction.createdAt
+                    );
+
+                return (
+                    date >= startOfMonth &&
+                    date <= now
+                );
+            }
+        );
+    }
+
+    return historyExpenses;
 }
 
-// Renders leaderboard only from history API data
+
+// Renders leaderboard from filtered history
 function renderLeaderboard() {
-  if (!leaderboardList) {
-    return;
-  }
 
-  leaderboardList.innerHTML = "";
+    if (!leaderboardList) {
+        return;
+    }
 
-  let totalExpenseHistory = 0;
-  let totalIncomeHistory = 0;
+    leaderboardList.innerHTML = "";
 
-  if (!historyExpenses || historyExpenses.length === 0) {
+    const filteredHistory =
+        filterHistoryData();
+
+    let totalExpenseHistory = 0;
+
+    let totalIncomeHistory = 0;
+
+    filteredHistory.forEach(
+        (transaction) => {
+
+            const amount =
+                Number(
+                    transaction.amount || 0
+                );
+
+            if (isIncome(transaction)) {
+                totalIncomeHistory += amount;
+            } else {
+                totalExpenseHistory += amount;
+            }
+        }
+    );
+
+    const netBalance =
+        totalIncomeHistory -
+        totalExpenseHistory;
+
     if (leaderboardTotal) {
-      leaderboardTotal.textContent = "₹0.00";
-    }
 
-    leaderboardList.innerHTML = `
-
-            <div class="leaderboard-empty">
-
-                <div class="leaderboard-empty-icon">
-                    💸
-                </div>
-
-                <p>
-                    No transaction history yet.
-                </p>
-
-                <p>
-                    Add your first transaction!
-                </p>
-
-            </div>
-        `;
-
-    return;
-  }
-
-  historyExpenses.forEach((transaction, index) => {
-    const amount = Number(transaction.amount || 0);
-
-    const income = isIncome(transaction);
-
-    if (income) {
-      totalIncomeHistory += amount;
-    } else {
-      totalExpenseHistory += amount;
-    }
-
-    const item = document.createElement("div");
-
-    item.className = "leaderboard-item";
-
-    const left = document.createElement("div");
-
-    left.className = "leaderboard-item-left";
-
-    const description = document.createElement("div");
-
-    description.className = "leaderboard-description";
-
-    description.textContent = `${index + 1}. ${
-      transaction.description || "Transaction"
-    }`;
-
-    const category = document.createElement("span");
-
-    category.className = "leaderboard-category";
-
-    category.textContent = transaction.category || "Other";
-
-    const type = document.createElement("span");
-
-    type.className = income ? "leaderboard-income" : "leaderboard-expense";
-
-    type.textContent = income ? "Income" : "Expense";
-
-    const date = document.createElement("div");
-
-    date.className = "leaderboard-date";
-
-    date.textContent = formatLeaderboardDate(transaction.createdAt);
-
-    left.appendChild(description);
-
-    left.appendChild(category);
-
-    left.appendChild(type);
-
-    left.appendChild(date);
-
-    const amountElement = document.createElement("div");
-
-    // amountElement.className =
-    //     "leaderboard-amount";
-
-    amountElement.className = income
-      ? "leaderboard-amount leaderboard-income"
-      : "leaderboard-amount leaderboard-expense";
-
-    amountElement.textContent = `${income ? "+" : "-"}₹${amount.toLocaleString(
-      "en-IN",
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      },
-    )}`;
-
-    item.appendChild(left);
-
-    item.appendChild(amountElement);
-
-    leaderboardList.appendChild(item);
-  });
-
-  const netBalance = totalIncomeHistory - totalExpenseHistory;
-
-  if (leaderboardTotal) {
-    leaderboardTotal.innerHTML = `
+        leaderboardTotal.innerHTML = `
             <div>
                 <small>Total Income</small>
-                <strong>
-                    +₹${totalIncomeHistory.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+
+                <strong class="leaderboard-income">
+                    +₹${totalIncomeHistory.toLocaleString(
+                        "en-IN",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    )}
                 </strong>
             </div>
 
             <div>
                 <small>Total Expense</small>
-                <strong>
-                    -₹${totalExpenseHistory.toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+
+                <strong class="leaderboard-expense">
+                    -₹${totalExpenseHistory.toLocaleString(
+                        "en-IN",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    )}
                 </strong>
             </div>
 
             <div>
                 <small>Net Balance</small>
-                <strong>
-                    ${netBalance >= 0 ? "+" : "-"}₹${Math.abs(
-                      netBalance,
-                    ).toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+
+                <strong class="${
+                    netBalance >= 0
+                        ? "leaderboard-income"
+                        : "leaderboard-expense"
+                }">
+                    ${
+                        netBalance >= 0
+                            ? "+"
+                            : "-"
+                    }₹${Math.abs(
+                        netBalance
+                    ).toLocaleString(
+                        "en-IN",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    )}
                 </strong>
             </div>
         `;
-  }
+    }
+
+    if (
+        !filteredHistory ||
+        filteredHistory.length === 0
+    ) {
+
+        leaderboardList.innerHTML = `
+            <div class="leaderboard-empty">
+                <div class="leaderboard-empty-icon">
+                    💸
+                </div>
+
+                <p>
+                    No transactions found.
+                </p>
+
+                <p>
+                    Try another filter.
+                </p>
+            </div>
+        `;
+
+        renderLeaderboardPagination(
+            filteredHistory
+        );
+
+        return;
+    }
+
+    const start =
+        (leaderboardCurrentPage - 1) *
+        ITEMS_PER_PAGE;
+
+    const end =
+        start + ITEMS_PER_PAGE;
+
+    const pageHistory =
+        filteredHistory.slice(
+            start,
+            end
+        );
+
+    pageHistory.forEach(
+        (transaction, index) => {
+
+            const amount =
+                Number(
+                    transaction.amount || 0
+                );
+
+            const income =
+                isIncome(transaction);
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "leaderboard-item";
+
+            const left =
+                document.createElement(
+                    "div"
+                );
+
+            left.className =
+                "leaderboard-item-left";
+
+            const description =
+                document.createElement(
+                    "div"
+                );
+
+            description.className =
+                "leaderboard-description";
+
+            description.textContent =
+                `${start + index + 1}. ${
+                    transaction.description ||
+                    "Transaction"
+                }`;
+
+            const category =
+                document.createElement(
+                    "span"
+                );
+
+            category.className =
+                "leaderboard-category";
+
+            category.textContent =
+                transaction.category ||
+                "Other";
+
+            const type =
+                document.createElement(
+                    "span"
+                );
+
+            type.className =
+                income
+                    ? "leaderboard-income"
+                    : "leaderboard-expense";
+
+            type.textContent =
+                income
+                    ? "Income"
+                    : "Expense";
+
+            const date =
+                document.createElement(
+                    "div"
+                );
+
+            date.className =
+                "leaderboard-date";
+
+            date.textContent =
+                formatLeaderboardDate(
+                    transaction.createdAt
+                );
+
+            left.appendChild(
+                description
+            );
+
+            left.appendChild(
+                category
+            );
+
+            left.appendChild(
+                type
+            );
+
+            left.appendChild(
+                date
+            );
+
+            const amountElement =
+                document.createElement(
+                    "div"
+                );
+
+            amountElement.className =
+                income
+                    ? "leaderboard-amount leaderboard-income"
+                    : "leaderboard-amount leaderboard-expense";
+
+            amountElement.textContent =
+                `${income ? "+" : "-"}₹${amount.toLocaleString(
+                    "en-IN",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                )}`;
+
+            item.appendChild(left);
+
+            item.appendChild(
+                amountElement
+            );
+
+            leaderboardList.appendChild(
+                item
+            );
+        }
+    );
+
+    renderLeaderboardPagination(
+        filteredHistory
+    );
 }
+
+
+// Renders leaderboard pagination
+function renderLeaderboardPagination(
+    filteredHistory
+) {
+
+    let pagination =
+        document.getElementById(
+            "leaderboardPagination"
+        );
+
+    if (!pagination) {
+
+        pagination =
+            document.createElement("div");
+
+        pagination.id =
+            "leaderboardPagination";
+
+        pagination.className =
+            "pagination";
+
+        if (leaderboardList.parentElement) {
+
+            leaderboardList.parentElement.appendChild(
+                pagination
+            );
+        }
+    }
+
+    pagination.innerHTML = "";
+
+    const totalPages =
+        Math.ceil(
+            filteredHistory.length /
+            ITEMS_PER_PAGE
+        );
+
+    if (totalPages <= 1) {
+        return;
+    }
+
+    const previous =
+        document.createElement("button");
+
+    previous.textContent = "←";
+
+    previous.disabled =
+        leaderboardCurrentPage === 1;
+
+    previous.onclick = () => {
+
+        if (
+            leaderboardCurrentPage >
+            1
+        ) {
+
+            leaderboardCurrentPage--;
+
+            renderLeaderboard();
+        }
+    };
+
+    pagination.appendChild(previous);
+
+    for (
+        let page = 1;
+        page <= totalPages;
+        page++
+    ) {
+
+        const button =
+            document.createElement("button");
+
+        button.textContent = page;
+
+        if (
+            page ===
+            leaderboardCurrentPage
+        ) {
+
+            button.classList.add(
+                "active"
+            );
+        }
+
+        button.onclick = () => {
+
+            leaderboardCurrentPage =
+                page;
+
+            renderLeaderboard();
+        };
+
+        pagination.appendChild(
+            button
+        );
+    }
+
+    const next =
+        document.createElement("button");
+
+    next.textContent = "→";
+
+    next.disabled =
+        leaderboardCurrentPage ===
+        totalPages;
+
+    next.onclick = () => {
+
+        if (
+            leaderboardCurrentPage <
+            totalPages
+        ) {
+
+            leaderboardCurrentPage++;
+
+            renderLeaderboard();
+        }
+    };
+
+    pagination.appendChild(next);
+}
+
+
+// Deletes current transaction
+async function deleteExpense(id) {
+
+    const confirmDelete =
+        confirm(
+            "Are you sure you want to delete this transaction?"
+        );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/expenses/${id}`,
+                {
+                    method: "DELETE",
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                result.message ||
+                "Failed to delete transaction"
+            );
+
+            return;
+        }
+
+        alert(
+            result.message ||
+            "Transaction deleted successfully!"
+        );
+
+        await fetchExpenses();
+
+        if (
+            user &&
+            user.isPremium === true
+        ) {
+
+            await fetchExpenseHistory();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Delete Transaction Error:",
+            error
+        );
+
+        alert(
+            "Server error. Please try again."
+        );
+    }
+}
+
+
+// Toggles light and dark theme
+function initializeTheme() {
+
+    const themeToggle =
+        document.getElementById(
+            "themeToggle"
+        );
+
+    if (!themeToggle) {
+        return;
+    }
+
+    const savedTheme =
+        localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+
+        document.body.classList.add(
+            "dark-theme"
+        );
+
+        themeToggle.textContent =
+            "🌙";
+
+    } else {
+
+        themeToggle.textContent =
+            "🌞";
+    }
+
+    themeToggle.addEventListener(
+        "click",
+        () => {
+
+            document.body.classList.toggle(
+                "dark-theme"
+            );
+
+            const isDark =
+                document.body.classList.contains(
+                    "dark-theme"
+                );
+
+            if (isDark) {
+
+                themeToggle.textContent =
+                    "🌙";
+
+                localStorage.setItem(
+                    "theme",
+                    "dark"
+                );
+
+            } else {
+
+                themeToggle.textContent =
+                    "🌞";
+
+                localStorage.setItem(
+                    "theme",
+                    "light"
+                );
+            }
+        }
+    );
+}
+
+
+// Handles premium membership payment
+async function handlePremiumPayment() {
+
+    const phone =
+        prompt(
+            "Enter your 10 digit mobile number"
+        );
+
+    if (phone === null) {
+        return;
+    }
+
+    const cleanPhone =
+        phone.trim();
+
+    if (
+        !/^[6-9]\d{9}$/.test(
+            cleanPhone
+        )
+    ) {
+
+        alert(
+            "Please enter a valid 10 digit mobile number"
+        );
+
+        return;
+    }
+
+    try {
+
+        premiumBtn.disabled =
+            true;
+
+        premiumBtn.innerText =
+            "Processing...";
+
+        const currentToken =
+            localStorage.getItem(
+                "token"
+            );
+
+        const response =
+            await fetch(
+                "/api/payment/create-order",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        Authorization:
+                            `Bearer ${currentToken}`
+                    },
+
+                    body:
+                        JSON.stringify({
+                            phone:
+                                cleanPhone
+                        })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            alert(
+                data.message ||
+                "Unable to create order"
+            );
+
+            premiumBtn.disabled =
+                false;
+
+            premiumBtn.innerText =
+                "💎 Buy Premium Membership";
+
+            return;
+        }
+
+        await cashfree.checkout({
+            paymentSessionId:
+                data.paymentSessionId,
+
+            redirectTarget:
+                "_self"
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Payment Error:",
+            error
+        );
+
+        alert(
+            "Something went wrong. Please try again."
+        );
+
+        premiumBtn.disabled =
+            false;
+
+        premiumBtn.innerText =
+            "💎 Buy Premium Membership";
+    }
+}
+
+
+// Verifies Cashfree payment
+async function verifyPayment(orderId) {
+
+    try {
+
+        const currentToken =
+            localStorage.getItem(
+                "token"
+            );
+
+        const response =
+            await fetch(
+                `/api/payment/verify/${orderId}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${currentToken}`
+                    }
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            response.ok &&
+            data.status ===
+                "SUCCESSFUL"
+        ) {
+
+            alert(
+                "Transaction successful"
+            );
+
+            const currentUser =
+                JSON.parse(
+                    localStorage.getItem(
+                        "user"
+                    ) || "null"
+                );
+
+            if (currentUser) {
+
+                currentUser.isPremium =
+                    true;
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(
+                        currentUser
+                    )
+                );
+            }
+
+            setPremiumBtn();
+
+            if (boardBtn) {
+                boardBtn.style.display =
+                    "flex";
+            }
+
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+
+        } else if (
+            data.status === "FAILED"
+        ) {
+
+            alert(
+                "TRANSACTION FAILED."
+            );
+
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+
+        } else {
+
+            alert(
+                data.message ||
+                "Unable to verify transaction."
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Verification Error:",
+            error
+        );
+
+        alert(
+            "Unable to verify transaction."
+        );
+    }
+}
+
+
+// Opens leaderboard for premium users
+async function openLeaderboard() {
+
+    if (
+        !user ||
+        user.isPremium !== true
+    ) {
+        return;
+    }
+
+    if (leaderboardOverlay) {
+
+        leaderboardOverlay.classList.add(
+            "active"
+        );
+    }
+
+    leaderboardCurrentPage = 1;
+
+    if (historyFilter) {
+        historyFilter.value = "all";
+    }
+
+    await fetchExpenseHistory();
+}
+
+
+// Closes leaderboard
+function closeLeaderboardPanel() {
+
+    if (leaderboardOverlay) {
+
+        leaderboardOverlay.classList.remove(
+            "active"
+        );
+    }
+}
+
+
+// Changes leaderboard filter
+function handleHistoryFilter() {
+
+    leaderboardCurrentPage = 1;
+
+    renderLeaderboard();
+}
+
+
+// Closes leaderboard outside panel
+function handleLeaderboardOutsideClick(
+    event
+) {
+
+    if (
+        event.target ===
+        leaderboardOverlay
+    ) {
+
+        leaderboardOverlay.classList.remove(
+            "active"
+        );
+    }
+}
+
 
 // Formats leaderboard date
-function formatLeaderboardDate(date) {
-  if (!date) {
-    return "";
-  }
+function formatLeaderboardDate(
+    date
+) {
 
-  const d = new Date(date);
+    if (!date) {
+        return "";
+    }
 
-  if (isNaN(d.getTime())) {
-    return "";
-  }
+    const d =
+        new Date(date);
 
-  return d.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+    if (isNaN(d.getTime())) {
+        return "";
+    }
+
+    return d.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
 }
+
 
 // Escapes HTML content
 function escapeHTML(value) {
-  const div = document.createElement("div");
 
-  div.textContent = value ?? "";
+    const div =
+        document.createElement(
+            "div"
+        );
 
-  return div.innerHTML;
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
 }
+
 
 // Initializes dashboard
 async function initializeDashboard() {
-  await fetchExpenses();
 
-  if (user && user.isPremium === true) {
-    await fetchExpenseHistory();
-  }
+    checkPremiumStatus();
+
+    initializeTheme();
+
+    await fetchExpenses();
+
+    if (
+        user &&
+        user.isPremium === true
+    ) {
+
+        await fetchExpenseHistory();
+    }
 }
 
+
+// Logout
+if (logoutBtn) {
+
+    logoutBtn.addEventListener(
+        "click",
+        () => {
+
+            localStorage.removeItem(
+                "token"
+            );
+
+            localStorage.removeItem(
+                "user"
+            );
+
+            window.location.href =
+                "login.html";
+        }
+    );
+}
+
+
+// Expense form
+if (expenseForm) {
+
+    expenseForm.addEventListener(
+        "submit",
+        addTransaction
+    );
+}
+
+
+// Premium payment
+if (premiumBtn) {
+
+    premiumBtn.addEventListener(
+        "click",
+        handlePremiumPayment
+    );
+}
+
+
+// Leaderboard button
+if (
+    boardBtn &&
+    user &&
+    user.isPremium === true
+) {
+
+    boardBtn.addEventListener(
+        "click",
+        openLeaderboard
+    );
+}
+
+
+// Close leaderboard button
+if (closeLeaderboard) {
+
+    closeLeaderboard.addEventListener(
+        "click",
+        closeLeaderboardPanel
+    );
+}
+
+
+// Close leaderboard outside panel
+if (leaderboardOverlay) {
+
+    leaderboardOverlay.addEventListener(
+        "click",
+        handleLeaderboardOutsideClick
+    );
+}
+
+
+// History filter
+if (historyFilter) {
+
+    historyFilter.addEventListener(
+        "change",
+        handleHistoryFilter
+    );
+}
+
+
+checkPremiumStatus();
+
 initializeDashboard();
+
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const orderId =
+    urlParams.get("order_id");
+
+if (orderId) {
+
+    verifyPayment(orderId);
+}
