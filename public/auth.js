@@ -1,5 +1,7 @@
 const API_URL = "/api";
 
+const loginMessage = document.getElementById("loginMessage");
+
 async function handleForm(event) {
   event.preventDefault();
 
@@ -56,12 +58,19 @@ async function loginHandler(event) {
     console.log(result);
 
     if (!response.ok) {
-      alert(result.message || "Login failed");
+      // alert(result.message || "Login failed");
+      loginMessage.textContent = result.message || "Login Failed";
+      loginMessage.className = "show error";
       return;
     } else {
-      alert("User login Successfull!");
+      // alert("User login Successfull!");
+      loginMessage.textContent = "✓ Login Successful!";
+      loginMessage.className = "show success";
       event.target.reset();
-      window.location.href = "expense.html";
+
+      setTimeout(() => {
+        window.location.href = "expense.html";
+      }, 2000);
     }
 
     // Store JWT
@@ -75,6 +84,8 @@ async function loginHandler(event) {
   } catch (error) {
     console.error(error);
 
-    alert("Server error. Please try again.");
+    // alert("Server error. Please try again.");
+     loginMessage.textContent = "Server error. Please try again!";
+     loginMessage.className = "show error";
   }
 }

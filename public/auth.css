@@ -39,6 +39,50 @@ body {
   animation: cardAppear 0.5s ease;
 }
 
+/* #loginMessage{
+      font-size: 17px;
+    font-weight: 800;
+    position: absolute;
+    top: 1em;
+    left: 25em;
+} */
+
+#loginMessage {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px 15px;
+
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+
+    border-radius: 6px;
+
+    opacity: 0;
+    transform: translateX(-100px);
+
+    transition: all 0.5s ease;
+
+    pointer-events: none;
+}
+
+/* Message visible */
+#loginMessage.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Success */
+#loginMessage.success {
+    color: #155724;
+    background-color: #d4edda;
+}
+
+/* Error */
+#loginMessage.error {
+    color: #721c24;
+    background-color: #f8d7da;
+}
 /* HEADING */
 
 .main h2 {
