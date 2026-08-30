@@ -2864,3 +2864,494 @@ and (orientation: landscape) {
 button {
     touch-action: manipulation;
 }
+
+
+/* #ai-group{
+  position: absolute;
+    border: 3px solid black;
+    top: 31vw;
+    left: 34vw;
+    border-radius: 12px;
+    box-shadow: 2px 4px 5px blue;
+} 
+
+#aiStatus{
+   padding: 33px;
+    font-size: 32px;
+    font-weight: 500;
+    font-family: cursive;
+}*/
+
+
+#ai-group {
+    background: transparent;
+    position: absolute;
+    top: 31vw;
+    left: 34vw;
+
+    border-radius: 12px;
+
+    /* box-shadow: 2px 4px 15px blue; */
+
+    padding: 10px 20px;
+
+    /* Zoom animation */
+    animation: aiZoom 1.2s ease-in-out infinite;
+
+    transform-origin: center;
+}
+
+
+#aiStatus {
+    padding: 33px;
+    font-size: 32px;
+    font-weight: 500;
+    font-family: cursive;
+    display: block;
+    text-align: center;
+    color: blue;
+    text-shadow: 2px 4px 15px olivedrab;
+}
+
+
+/* Zoom In - Zoom Out Animation */
+
+@keyframes aiZoom {
+
+    0% {
+        transform: scale(0.85);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.85);
+        opacity: 0.6;
+    }
+
+}
+/* =========================================================
+   FINAL RESPONSIVE OVERRIDES
+   Added to make the dashboard reliable on:
+   - Desktop / Laptop
+   - Tablet
+   - Mobile
+   - Short-height phones / landscape
+   - Very small phones
+   - AI status / AI group
+   ========================================================= */
+
+/* Prevent viewport-based AI positioning from causing overflow */
+#ai-group {
+    position: fixed;
+    top: clamp(110px, 30vh, 360px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    width: min(90vw, 520px);
+    max-width: calc(100vw - 24px);
+    padding: clamp(6px, 1.5vw, 14px);
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    overflow: visible;
+}
+
+#aiStatus {
+    width: 100%;
+    max-width: 100%;
+    padding: clamp(8px, 3vw, 28px);
+    margin: 0;
+    box-sizing: border-box;
+    font-size: clamp(16px, 4vw, 32px);
+    line-height: 1.2;
+    font-weight: 500;
+    text-align: center;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Keep the existing zoom animation without fighting the centering transform */
+@keyframes aiZoomResponsive {
+    0% {
+        transform: translateX(-50%) scale(0.88);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) scale(0.88);
+        opacity: 0.6;
+    }
+}
+
+#ai-group {
+    animation: aiZoomResponsive 1.2s ease-in-out infinite;
+}
+
+/* Expense message */
+#expenseMessage {
+    width: min(600px, calc(100% - 24px));
+    min-height: 60px;
+    height: auto;
+    margin: 12px auto;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+}
+
+/* Desktop */
+@media (min-width: 1101px) {
+    .content {
+        width: min(92%, 1200px);
+    }
+
+    #ai-group {
+        top: clamp(140px, 30vh, 360px);
+    }
+}
+
+/* Laptop / small desktop */
+@media (max-width: 1100px) {
+    .header {
+        padding-left: clamp(16px, 4vw, 48px);
+        padding-right: clamp(16px, 4vw, 48px);
+    }
+
+    .content {
+        width: min(92%, 1100px);
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    #ai-group {
+        width: min(80vw, 480px);
+        top: clamp(120px, 28vh, 300px);
+    }
+}
+
+/* Tablet */
+@media (max-width: 850px) {
+    .header {
+        padding: 12px clamp(12px, 3vw, 28px);
+    }
+
+    .content {
+        width: calc(100% - 32px);
+        max-width: 900px;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-group:nth-child(2) {
+        grid-column: span 2;
+    }
+
+    .user-info {
+        display: none;
+    }
+
+    #ai-group {
+        width: min(82vw, 430px);
+        top: clamp(105px, 25vh, 260px);
+    }
+
+    #aiStatus {
+        font-size: clamp(17px, 3.5vw, 27px);
+    }
+
+    .leaderboard-panel {
+        width: min(410px, 90vw);
+    }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .header {
+        min-height: 62px;
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    .brand {
+        min-width: 0;
+        gap: 6px;
+    }
+
+    .brand h1 {
+        max-width: 32vw;
+        font-size: 15px;
+        line-height: 17px;
+    }
+
+    .user-section {
+        gap: 4px;
+    }
+
+    .content {
+        width: calc(100% - 20px);
+        padding: 20px 0 30px;
+    }
+
+    .welcome {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .total-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .expense-form-card {
+        padding: 20px 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 13px;
+    }
+
+    .form-group:nth-child(2) {
+        grid-column: auto;
+    }
+
+    .add-expense-btn {
+        width: 100%;
+    }
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    /* AI: centered, contained, and never wider than the phone */
+    #ai-group {
+        width: calc(100vw - 24px);
+        max-width: 390px;
+        top: clamp(82px, 18vh, 170px);
+        left: 50%;
+        padding: 5px 8px;
+    }
+
+    #aiStatus {
+        padding: 8px 10px;
+        font-size: clamp(15px, 5vw, 22px);
+        line-height: 1.18;
+    }
+
+    #expenseMessage {
+        width: calc(100% - 20px);
+        min-height: 54px;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 430px) {
+    .header {
+        padding: 8px 9px;
+    }
+
+    .brand h1 {
+        max-width: 28vw;
+        font-size: 13px;
+        line-height: 15px;
+    }
+
+    .content {
+        width: calc(100% - 16px);
+        padding-top: 17px;
+    }
+
+    .expense-form-card {
+        padding: 17px 13px;
+    }
+
+    #ai-group {
+        width: calc(100vw - 18px);
+        max-width: 400px;
+        top: clamp(74px, 16vh, 145px);
+        padding: 4px 5px;
+    }
+
+    #aiStatus {
+        padding: 7px 6px;
+        font-size: clamp(14px, 5vw, 20px);
+        line-height: 1.15;
+    }
+
+    #expenseMessage {
+        width: calc(100% - 14px);
+        min-height: 50px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .leaderboard-panel {
+        width: 96vw;
+    }
+}
+
+/* Very small mobile */
+@media (max-width: 350px) {
+    .header {
+        padding: 7px 6px;
+    }
+
+    .brand h1 {
+        max-width: 24vw;
+        font-size: 12px;
+        line-height: 13px;
+    }
+
+    .content {
+        width: calc(100% - 12px);
+        padding-top: 14px;
+    }
+
+    .expense-form-card {
+        padding: 13px 9px;
+    }
+
+    #ai-group {
+        width: calc(100vw - 12px);
+        top: clamp(66px, 15vh, 125px);
+        padding: 3px;
+    }
+
+    #aiStatus {
+        padding: 6px 4px;
+        font-size: clamp(13px, 5.5vw, 18px);
+        line-height: 1.12;
+    }
+
+    #expenseMessage {
+        width: calc(100% - 8px);
+        min-height: 46px;
+        padding: 7px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Ultra-small phones */
+@media (max-width: 280px) {
+    .header {
+        padding: 6px 4px;
+    }
+
+    .content {
+        width: calc(100% - 8px);
+    }
+
+    #ai-group {
+        width: calc(100vw - 8px);
+        top: 62px;
+        padding: 2px;
+    }
+
+    #aiStatus {
+        padding: 5px 2px;
+        font-size: clamp(12px, 5.5vw, 16px);
+        line-height: 1.1;
+    }
+
+    #expenseMessage {
+        width: calc(100% - 4px);
+        min-height: 42px;
+        padding: 6px;
+        font-size: 10px;
+    }
+}
+
+/* Short screens: avoid pushing AI too far down */
+@media (max-height: 600px) {
+    #ai-group {
+        top: clamp(58px, 14vh, 120px);
+    }
+
+    #aiStatus {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .content {
+        padding-top: 15px;
+        padding-bottom: 20px;
+    }
+
+    .leaderboard-panel {
+        padding-top: max(8px, env(safe-area-inset-top));
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+}
+
+/* Short + narrow mobile */
+@media (max-width: 700px) and (max-height: 600px) {
+    #ai-group {
+        top: 58px;
+        width: calc(100vw - 16px);
+    }
+
+    #aiStatus {
+        font-size: clamp(13px, 4vw, 18px);
+        padding: 5px 6px;
+    }
+}
+
+/* Landscape mobile / tablet */
+@media (max-width: 850px) and (orientation: landscape) {
+    #ai-group {
+        top: 58px;
+        width: min(70vw, 440px);
+    }
+
+    #aiStatus {
+        font-size: clamp(14px, 3vw, 22px);
+        padding: 5px 10px;
+    }
+
+    .content {
+        padding-top: 15px;
+        padding-bottom: 20px;
+    }
+}
+
+/* Respect devices that have a notch / rounded screen */
+@supports (padding: env(safe-area-inset-left)) {
+    .header {
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+    }
+
+    #ai-group {
+        max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 12px);
+    }
+}
+
+/* Accessibility: reduce animation when requested */
+@media (prefers-reduced-motion: reduce) {
+    #ai-group {
+        animation: none;
+        transform: translateX(-50%) scale(1);
+    }
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
