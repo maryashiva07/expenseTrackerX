@@ -132,6 +132,8 @@ function isIncome(transaction) {
   return category === "salary";
 }
 
+
+
 // Adds a new transaction with note
 async function addTransaction(event) {
   event.preventDefault();
@@ -153,7 +155,6 @@ async function addTransaction(event) {
 
   if (!amount || amount <= 0) {
     // alert("Please enter a valid amount");
-    
 
     return;
   }
@@ -165,8 +166,10 @@ async function addTransaction(event) {
   }
 
   if (aiStatus) {
-    aiStatus.textContent = "✨ AI is categorizing...";
+    aiStatus.textContent = "✨ AI Is Categorizing...";
   }
+
+  
 
   try {
     const data = {
@@ -220,6 +223,7 @@ async function addTransaction(event) {
     if (aiStatus) {
       aiStatus.textContent =
         `✨ AI categorized as ${generatedCategory}`;
+        
     }
 
     alert(
