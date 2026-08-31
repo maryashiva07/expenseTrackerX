@@ -206,9 +206,67 @@ const deleteExpenses = async (req, res) => {
   }
 };
 
+
+// Edit expenses
+
+const editExpenses = async (req, res) => {
+  const { id } = req.params;
+  const { amount, description, note } = req.body;
+
+  try {
+    const expense = await Expense.findOne({
+      where: {
+        id: id,
+        userId: req.user.id,
+      },
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        message: "Expense not found!",
+      });
+    }
+
+    expense.amount = amount || expense.amount;
+
+    expense.description = description || expense.description;
+
+    expense.note = note !== undefined ? note : expense.note;
+
+    if (description) {
+      const category = await googleGenAi(description);
+      expense.category = category;
+    }
+
+    await expense.save();
+
+    //delete redis cache
+
+    const cacheKey = `expenses:user:${req.user.id}`;
+
+    await redisClient.del(cacheKey);
+
+    console.log("Redis cache deleted after updation!");
+
+    res.status(200).json({
+      message: "Expense Updated successfully",
+      expense,
+    });
+  } catch (err) {
+    console.error("Edit expense error", err);
+
+    res.status(500).json({
+      message: "Error on updation",
+      err: err.message,
+    });
+  }
+};
+
 module.exports = {
   createExpenses,
   getHistoryData,
   showExpenses,
   deleteExpenses,
+  editExpenses,
 };
+
