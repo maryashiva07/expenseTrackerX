@@ -52,7 +52,7 @@ async function startServer(){
    try{
            await sequelize.authenticate();
            console.log("database connected successfully!");
-          await sequelize.sync({alter: true});
+          await sequelize.sync();
           console.log("table has sync!");
 
           await connectRedis();
