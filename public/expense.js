@@ -60,7 +60,21 @@ const historyFilter = document.getElementById("historyFilter");
 
 const noteInput = document.getElementById("note");
 
-const expenseMessage = document.getElementById("expenseMessage");
+const expenseMessage = document.getElementById("msg");
+
+let editingExpenseId = null;
+
+function showMessage(message, type = "success") {
+  expenseMessage.textContent = message;
+
+  expenseMessage.className = type;
+
+  // Optional: automatically hide after 3 seconds
+  setTimeout(() => {
+    expenseMessage.textContent = "";
+    expenseMessage.className = "";
+  }, 3000);
+}
 
 if (user) {
   username.textContent = user.name || "User";
@@ -114,7 +128,7 @@ function getTransactionType() {
 // Checks whether a transaction is income
 function isIncome(transaction) {
   const type = String(
-    transaction.type || transaction.transactionType || ""
+    transaction.type || transaction.transactionType || "",
   ).toLowerCase();
 
   if (type === "income") {
@@ -125,42 +139,42 @@ function isIncome(transaction) {
     return false;
   }
 
-  const category = String(
-    transaction.category || ""
-  ).toLowerCase();
+  const category = String(transaction.category || "").toLowerCase();
 
   return category === "salary";
 }
-
-
 
 // Adds a new transaction with note
 async function addTransaction(event) {
   event.preventDefault();
 
-  const amount = Number(
-    document.getElementById("amount").value
-  );
+  const amount = Number(document.getElementById("amount").value);
 
-  const description = document
-    .getElementById("description")
-    .value
-    .trim();
+  const description = document.getElementById("description").value.trim();
 
-  const note = noteInput
-    ? noteInput.value.trim()
-    : "";
+  const note = noteInput ? noteInput.value.trim() : "";
 
   const type = getTransactionType();
 
   if (!amount || amount <= 0) {
     // alert("Please enter a valid amount");
-
+    showMessage("Please enter a valid amount!");
     return;
   }
 
   if (!description) {
-    alert("Please enter description");
+    // alert("Please enter description");
+    showMessage("Please enter description!");
+
+    return;
+  }
+
+  if (editingExpenseId) {
+    await updateExpense({
+      amount,
+      description,
+      note,
+    });
 
     return;
   }
@@ -169,8 +183,6 @@ async function addTransaction(event) {
     aiStatus.textContent = "✨ AI Is Categorizing...";
   }
 
-  
-
   try {
     const data = {
       amount,
@@ -178,20 +190,17 @@ async function addTransaction(event) {
       note,
     };
 
-    const response = await fetch(
-      `${API_URL}/expenses`,
-      {
-        method: "POST",
+    const response = await fetch(`${API_URL}/expenses`, {
+      method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
+      headers: {
+        "Content-Type": "application/json",
 
-          Authorization: `Bearer ${token}`,
-        },
+        Authorization: `Bearer ${token}`,
+      },
 
-        body: JSON.stringify(data),
-      }
-    );
+      body: JSON.stringify(data),
+    });
 
     const result = await response.json();
 
@@ -200,10 +209,8 @@ async function addTransaction(event) {
         aiStatus.textContent = "";
       }
 
-      alert(
-        result.message ||
-          "Failed to add transaction"
-      );
+      // alert(result.message || "Failed to add transaction");
+      showMessage(result.message || "Failed to add transaction!");
 
       // expenseMessage.textContent = `${result.message}` || "Failed to add transaction";
 
@@ -211,25 +218,18 @@ async function addTransaction(event) {
     }
 
     const generatedCategory =
-      result.expense?.category ||
-      result.expenses?.category ||
-      "Other";
+      result.expense?.category || result.expenses?.category || "Other";
 
     if (categoryInput) {
-      categoryInput.value =
-        generatedCategory;
+      categoryInput.value = generatedCategory;
     }
 
     if (aiStatus) {
-      aiStatus.textContent =
-        `✨ AI categorized as ${generatedCategory}`;
-        
+      aiStatus.textContent = `✨ AI categorized as ${generatedCategory}`;
     }
 
-    alert(
-      result.message ||
-        "Transaction added successfully!"
-    );
+    // alert(result.message || "Transaction added successfully!");
+    showMessage(result.message || "Transaction added successfully!");
 
     expenseForm.reset();
 
@@ -239,110 +239,77 @@ async function addTransaction(event) {
 
     await fetchExpenses();
 
-    if (
-      user &&
-      user.isPremium === true
-    ) {
+    if (user && user.isPremium === true) {
       await fetchExpenseHistory();
     }
   } catch (error) {
-    console.error(
-      "Add Transaction Error:",
-      error
-    );
+    console.error("Add Transaction Error:", error);
 
     if (aiStatus) {
       aiStatus.textContent = "";
     }
 
-    alert(
-      "Server error. Please try again."
-    );
+    // alert("Server error. Please try again.");
+    showMessage("Server error. Please try again.");
   }
 }
 
 // Fetches current transactions
 async function fetchExpenses() {
   try {
-    const response = await fetch(
-      `${API_URL}/expenses`,
-      {
-        method: "GET",
+    const response = await fetch(`${API_URL}/expenses`, {
+      method: "GET",
 
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    );
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    const result =
-      await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
-      alert(
-        result.message ||
-          "Failed to fetch expenses"
-      );
+      // alert(result.message || "Failed to fetch expenses");
+      showMessage(result.message || "Failed to fetch expense");
 
       return;
     }
 
-    expenses = Array.isArray(result)
-      ? result
-      : result.expenses || [];
+    expenses = Array.isArray(result) ? result : result.expenses || [];
 
     expenseCurrentPage = 1;
 
     displayExpenses();
   } catch (error) {
-    console.error(
-      "Fetch Expenses Error:",
-      error
-    );
+    console.error("Fetch Expenses Error:", error);
   }
 }
 
 // Fetches complete transaction history
 async function fetchExpenseHistory() {
   try {
-    const response = await fetch(
-      `${API_URL}/history`,
-      {
-        method: "GET",
+    const response = await fetch(`${API_URL}/history`, {
+      method: "GET",
 
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    );
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    const result =
-      await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
-      console.error(
-        "History fetch failed:",
-        result.message
-      );
+      console.error("History fetch failed:", result.message);
 
       return;
     }
 
-    historyExpenses =
-      Array.isArray(result)
-        ? result
-        : result.historyData || [];
+    historyExpenses = Array.isArray(result) ? result : result.historyData || [];
 
     leaderboardCurrentPage = 1;
 
     renderLeaderboard();
   } catch (error) {
-    console.error(
-      "Fetch History Error:",
-      error
-    );
+    console.error("Fetch History Error:", error);
   }
 }
 
@@ -350,10 +317,7 @@ async function fetchExpenseHistory() {
 function displayExpenses() {
   expenseTableBody.innerHTML = "";
 
-  if (
-    !expenses ||
-    expenses.length === 0
-  ) {
+  if (!expenses || expenses.length === 0) {
     expenseTableBody.innerHTML = `
       <tr class="empty-row">
         <td colspan="7">
@@ -381,8 +345,7 @@ function displayExpenses() {
       totalIncome.textContent = "0";
     }
 
-    expenseCount.textContent =
-      "0 transactions";
+    expenseCount.textContent = "0 transactions";
 
     renderExpensePagination();
 
@@ -393,114 +356,75 @@ function displayExpenses() {
 
   let incomeTotal = 0;
 
-  expenses.forEach(
-    (transaction) => {
-      const amount = Number(
-        transaction.amount || 0
-      );
+  expenses.forEach((transaction) => {
+    const amount = Number(transaction.amount || 0);
 
-      if (isIncome(transaction)) {
-        incomeTotal += amount;
-      } else {
-        expenseTotal += amount;
-      }
+    if (isIncome(transaction)) {
+      incomeTotal += amount;
+    } else {
+      expenseTotal += amount;
     }
-  );
+  });
 
-  totalExpense.textContent =
-    expenseTotal.toFixed(2);
+  totalExpense.textContent = expenseTotal.toFixed(2);
 
   if (totalIncome) {
-    totalIncome.textContent =
-      incomeTotal.toFixed(2);
+    totalIncome.textContent = incomeTotal.toFixed(2);
   }
 
-  expenseCount.textContent =
-    `${expenses.length} ${
-      expenses.length === 1
-        ? "transaction"
-        : "transactions"
-    }`;
+  expenseCount.textContent = `${expenses.length} ${
+    expenses.length === 1 ? "transaction" : "transactions"
+  }`;
 
-  const start =
-    (expenseCurrentPage - 1) *
-    ITEMS_PER_PAGE;
+  const start = (expenseCurrentPage - 1) * ITEMS_PER_PAGE;
 
-  const end =
-    start + ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
 
-  const pageExpenses =
-    expenses.slice(start, end);
+  const pageExpenses = expenses.slice(start, end);
 
-  pageExpenses.forEach(
-    (transaction, index) => {
-      const amount = Number(
-        transaction.amount || 0
-      );
+  pageExpenses.forEach((transaction, index) => {
+    const amount = Number(transaction.amount || 0);
 
-      const income =
-        isIncome(transaction);
+    const income = isIncome(transaction);
 
-      const row =
-        document.createElement("tr");
+    const row = document.createElement("tr");
 
-      const date =
-        new Date(
-          transaction.createdAt
-        );
+    const date = new Date(transaction.createdAt);
 
-      const month =
-        date.getMonth() + 1;
+    const month = date.getMonth() + 1;
 
-      const newDate =
-        date.getDate() +
-        "/" +
-        String(month).padStart(
-          2,
-          "0"
-        ) +
-        "/" +
-        date.getFullYear();
+    const newDate =
+      date.getDate() +
+      "/" +
+      String(month).padStart(2, "0") +
+      "/" +
+      date.getFullYear();
 
-      const actualIndex =
-        start + index;
+    const actualIndex = start + index;
 
-      row.innerHTML = `
+    row.innerHTML = `
         <td>
           ${actualIndex + 1}
         </td>
 
         <td>
-          ${escapeHTML(
-            transaction.description
-          )}
+          ${escapeHTML(transaction.description)}
         </td>
 
         <td>
-          ${escapeHTML(
-            transaction.note || "-"
-          )}
+          ${escapeHTML(transaction.note || "-")}
         </td>
 
         <td>
-          ${escapeHTML(
-            transaction.category ||
-            "Other"
-          )}
+          ${escapeHTML(transaction.category || "Other")}
         </td>
 
         <td>
           ${newDate}
         </td>
 
-        <td class="${
-          income
-            ? "leaderboard-income"
-            : "leaderboard-expense"
-        }">
-          ${
-            income ? "+" : "-"
-          }₹${amount.toFixed(2)}
+        <td class="${income ? "leaderboard-income" : "leaderboard-expense"}">
+          ${income ? "+" : "-"}₹${amount.toFixed(2)}
         </td>
 
         <td>
@@ -511,65 +435,51 @@ function displayExpenses() {
             Delete
           </button>
         </td>
+
+        <td>
+           <button class="edit-btn" onclick="editExpense(${transaction.id})">
+               Edit
+           </button>
+        </td>
       `;
 
-      expenseTableBody.appendChild(
-        row
-      );
-    }
-  );
+    expenseTableBody.appendChild(row);
+  });
 
   renderExpensePagination();
 }
 
 // Renders expense pagination
 function renderExpensePagination() {
-  let pagination =
-    document.getElementById(
-      "expensePagination"
-    );
+  let pagination = document.getElementById("expensePagination");
 
   if (!pagination) {
-    pagination =
-      document.createElement("div");
+    pagination = document.createElement("div");
 
-    pagination.id =
-      "expensePagination";
+    pagination.id = "expensePagination";
 
-    pagination.className =
-      "pagination";
+    pagination.className = "pagination";
 
-    const tableCard =
-      document.querySelector(
-        ".expense-table-card"
-      );
+    const tableCard = document.querySelector(".expense-table-card");
 
     if (tableCard) {
-      tableCard.appendChild(
-        pagination
-      );
+      tableCard.appendChild(pagination);
     }
   }
 
   pagination.innerHTML = "";
 
-  const totalPages =
-    Math.ceil(
-      expenses.length /
-      ITEMS_PER_PAGE
-    );
+  const totalPages = Math.ceil(expenses.length / ITEMS_PER_PAGE);
 
   if (totalPages <= 1) {
     return;
   }
 
-  const previous =
-    document.createElement("button");
+  const previous = document.createElement("button");
 
   previous.textContent = "←";
 
-  previous.disabled =
-    expenseCurrentPage === 1;
+  previous.disabled = expenseCurrentPage === 1;
 
   previous.onclick = () => {
     if (expenseCurrentPage > 1) {
@@ -579,26 +489,15 @@ function renderExpensePagination() {
     }
   };
 
-  pagination.appendChild(
-    previous
-  );
+  pagination.appendChild(previous);
 
-  for (
-    let page = 1;
-    page <= totalPages;
-    page++
-  ) {
-    const button =
-      document.createElement("button");
+  for (let page = 1; page <= totalPages; page++) {
+    const button = document.createElement("button");
 
     button.textContent = page;
 
-    if (
-      page === expenseCurrentPage
-    ) {
-      button.classList.add(
-        "active"
-      );
+    if (page === expenseCurrentPage) {
+      button.classList.add("active");
     }
 
     button.onclick = () => {
@@ -607,25 +506,17 @@ function renderExpensePagination() {
       displayExpenses();
     };
 
-    pagination.appendChild(
-      button
-    );
+    pagination.appendChild(button);
   }
 
-  const next =
-    document.createElement("button");
+  const next = document.createElement("button");
 
   next.textContent = "→";
 
-  next.disabled =
-    expenseCurrentPage ===
-    totalPages;
+  next.disabled = expenseCurrentPage === totalPages;
 
   next.onclick = () => {
-    if (
-      expenseCurrentPage <
-      totalPages
-    ) {
+    if (expenseCurrentPage < totalPages) {
       expenseCurrentPage++;
 
       displayExpenses();
@@ -637,10 +528,7 @@ function renderExpensePagination() {
 
 // Filters history according to selected period
 function filterHistoryData() {
-  const filter =
-    historyFilter
-      ? historyFilter.value
-      : "all";
+  const filter = historyFilter ? historyFilter.value : "all";
 
   if (filter === "all") {
     return historyExpenses;
@@ -648,83 +536,40 @@ function filterHistoryData() {
 
   const now = new Date();
 
-  const todayStart =
-    new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   if (filter === "today") {
-    return historyExpenses.filter(
-      (transaction) => {
-        const date =
-          new Date(
-            transaction.createdAt
-          );
+    return historyExpenses.filter((transaction) => {
+      const date = new Date(transaction.createdAt);
 
-        return (
-          date >= todayStart &&
-          date <= now
-        );
-      }
-    );
+      return date >= todayStart && date <= now;
+    });
   }
 
   if (filter === "weekly") {
-    const day =
-      now.getDay();
+    const day = now.getDay();
 
-    const startOfWeek =
-      new Date(now);
+    const startOfWeek = new Date(now);
 
-    startOfWeek.setDate(
-      now.getDate() - day
-    );
+    startOfWeek.setDate(now.getDate() - day);
 
-    startOfWeek.setHours(
-      0,
-      0,
-      0,
-      0
-    );
+    startOfWeek.setHours(0, 0, 0, 0);
 
-    return historyExpenses.filter(
-      (transaction) => {
-        const date =
-          new Date(
-            transaction.createdAt
-          );
+    return historyExpenses.filter((transaction) => {
+      const date = new Date(transaction.createdAt);
 
-        return (
-          date >= startOfWeek &&
-          date <= now
-        );
-      }
-    );
+      return date >= startOfWeek && date <= now;
+    });
   }
 
   if (filter === "monthly") {
-    const startOfMonth =
-      new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        1
-      );
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    return historyExpenses.filter(
-      (transaction) => {
-        const date =
-          new Date(
-            transaction.createdAt
-          );
+    return historyExpenses.filter((transaction) => {
+      const date = new Date(transaction.createdAt);
 
-        return (
-          date >= startOfMonth &&
-          date <= now
-        );
-      }
-    );
+      return date >= startOfMonth && date <= now;
+    });
   }
 
   return historyExpenses;
@@ -738,34 +583,23 @@ function renderLeaderboard() {
 
   leaderboardList.innerHTML = "";
 
-  const filteredHistory =
-    filterHistoryData();
+  const filteredHistory = filterHistoryData();
 
   let totalExpenseHistory = 0;
 
   let totalIncomeHistory = 0;
 
-  filteredHistory.forEach(
-    (transaction) => {
-      const amount = Number(
-        transaction.amount || 0
-      );
+  filteredHistory.forEach((transaction) => {
+    const amount = Number(transaction.amount || 0);
 
-      if (
-        isIncome(transaction)
-      ) {
-        totalIncomeHistory +=
-          amount;
-      } else {
-        totalExpenseHistory +=
-          amount;
-      }
+    if (isIncome(transaction)) {
+      totalIncomeHistory += amount;
+    } else {
+      totalExpenseHistory += amount;
     }
-  );
+  });
 
-  const netBalance =
-    totalIncomeHistory -
-    totalExpenseHistory;
+  const netBalance = totalIncomeHistory - totalExpenseHistory;
 
   if (leaderboardTotal) {
     leaderboardTotal.innerHTML = `
@@ -773,13 +607,10 @@ function renderLeaderboard() {
         <small>Total Income</small>
 
         <strong class="leaderboard-income">
-          +₹${totalIncomeHistory.toLocaleString(
-            "en-IN",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          )}
+          +₹${totalIncomeHistory.toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </strong>
       </div>
 
@@ -787,13 +618,10 @@ function renderLeaderboard() {
         <small>Total Expense</small>
 
         <strong class="leaderboard-expense">
-          -₹${totalExpenseHistory.toLocaleString(
-            "en-IN",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          )}
+          -₹${totalExpenseHistory.toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </strong>
       </div>
 
@@ -801,32 +629,21 @@ function renderLeaderboard() {
         <small>Net Balance</small>
 
         <strong class="${
-          netBalance >= 0
-            ? "leaderboard-income"
-            : "leaderboard-expense"
+          netBalance >= 0 ? "leaderboard-income" : "leaderboard-expense"
         }">
-          ${
-            netBalance >= 0
-              ? "+"
-              : "-"
-          }₹${Math.abs(
-            netBalance
-          ).toLocaleString(
+          ${netBalance >= 0 ? "+" : "-"}₹${Math.abs(netBalance).toLocaleString(
             "en-IN",
             {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-            }
+            },
           )}
         </strong>
       </div>
     `;
   }
 
-  if (
-    !filteredHistory ||
-    filteredHistory.length === 0
-  ) {
+  if (!filteredHistory || filteredHistory.length === 0) {
     leaderboardList.innerHTML = `
       <div class="leaderboard-empty">
         <div class="leaderboard-empty-icon">
@@ -843,248 +660,154 @@ function renderLeaderboard() {
       </div>
     `;
 
-    renderLeaderboardPagination(
-      filteredHistory
-    );
+    renderLeaderboardPagination(filteredHistory);
 
     return;
   }
 
-  const start =
-    (leaderboardCurrentPage - 1) *
-    ITEMS_PER_PAGE;
+  const start = (leaderboardCurrentPage - 1) * ITEMS_PER_PAGE;
 
-  const end =
-    start + ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
 
-  const pageHistory =
-    filteredHistory.slice(
-      start,
-      end
-    );
+  const pageHistory = filteredHistory.slice(start, end);
 
-  pageHistory.forEach(
-    (transaction, index) => {
-      const amount = Number(
-        transaction.amount || 0
-      );
+  pageHistory.forEach((transaction, index) => {
+    const amount = Number(transaction.amount || 0);
 
-      const income =
-        isIncome(transaction);
+    const income = isIncome(transaction);
 
-      const item =
-        document.createElement("div");
+    const item = document.createElement("div");
 
-      item.className =
-        "leaderboard-item";
+    item.className = "leaderboard-item";
 
-      const left =
-        document.createElement("div");
+    const left = document.createElement("div");
 
-      left.className =
-        "leaderboard-item-left";
+    left.className = "leaderboard-item-left";
 
-      const description =
-        document.createElement("div");
+    const description = document.createElement("div");
 
-      description.className =
-        "leaderboard-description";
+    description.className = "leaderboard-description";
 
-      description.textContent =
-        `${start + index + 1}. ${
-          transaction.description ||
-          "Transaction"
-        }`;
+    description.textContent = `${start + index + 1}. ${
+      transaction.description || "Transaction"
+    }`;
 
-      const category =
-        document.createElement("span");
+    const category = document.createElement("span");
 
-      category.className =
-        "leaderboard-category";
+    category.className = "leaderboard-category";
 
-      category.textContent =
-        transaction.category ||
-        "Other";
+    category.textContent = transaction.category || "Other";
 
-      const type =
-        document.createElement("span");
+    const type = document.createElement("span");
 
-      type.className =
-        income
-          ? "leaderboard-income"
-          : "leaderboard-expense";
+    type.className = income ? "leaderboard-income" : "leaderboard-expense";
 
-      type.textContent =
-        income
-          ? "Income"
-          : "Expense";
+    type.textContent = income ? "Income" : "Expense";
 
-      const date =
-        document.createElement("div");
+    const date = document.createElement("div");
 
-      date.className =
-        "leaderboard-date";
+    date.className = "leaderboard-date";
 
-      date.textContent =
-        formatLeaderboardDate(
-          transaction.createdAt
-        );
+    date.textContent = formatLeaderboardDate(transaction.createdAt);
 
-      left.appendChild(
-        description
-      );
+    left.appendChild(description);
 
-      left.appendChild(
-        category
-      );
+    left.appendChild(category);
 
-      left.appendChild(type);
+    left.appendChild(type);
 
-      left.appendChild(date);
+    left.appendChild(date);
 
-      const amountElement =
-        document.createElement("div");
+    const amountElement = document.createElement("div");
 
-      amountElement.className =
-        income
-          ? "leaderboard-amount leaderboard-income"
-          : "leaderboard-amount leaderboard-expense";
+    amountElement.className = income
+      ? "leaderboard-amount leaderboard-income"
+      : "leaderboard-amount leaderboard-expense";
 
-      amountElement.textContent =
-        `${
-          income ? "+" : "-"
-        }₹${amount.toLocaleString(
-          "en-IN",
-          {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }
-        )}`;
+    amountElement.textContent = `${income ? "+" : "-"}₹${amount.toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    )}`;
 
-      item.appendChild(left);
+    item.appendChild(left);
 
-      item.appendChild(
-        amountElement
-      );
+    item.appendChild(amountElement);
 
-      leaderboardList.appendChild(
-        item
-      );
-    }
-  );
+    leaderboardList.appendChild(item);
+  });
 
-  renderLeaderboardPagination(
-    filteredHistory
-  );
+  renderLeaderboardPagination(filteredHistory);
 }
 
 // Renders leaderboard pagination
-function renderLeaderboardPagination(
-  filteredHistory
-) {
-  let pagination =
-    document.getElementById(
-      "leaderboardPagination"
-    );
+function renderLeaderboardPagination(filteredHistory) {
+  let pagination = document.getElementById("leaderboardPagination");
 
   if (!pagination) {
-    pagination =
-      document.createElement("div");
+    pagination = document.createElement("div");
 
-    pagination.id =
-      "leaderboardPagination";
+    pagination.id = "leaderboardPagination";
 
-    pagination.className =
-      "pagination";
+    pagination.className = "pagination";
 
-    if (
-      leaderboardList.parentElement
-    ) {
-      leaderboardList.parentElement.appendChild(
-        pagination
-      );
+    if (leaderboardList.parentElement) {
+      leaderboardList.parentElement.appendChild(pagination);
     }
   }
 
   pagination.innerHTML = "";
 
-  const totalPages =
-    Math.ceil(
-      filteredHistory.length /
-      ITEMS_PER_PAGE
-    );
+  const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
 
   if (totalPages <= 1) {
     return;
   }
 
-  const previous =
-    document.createElement("button");
+  const previous = document.createElement("button");
 
   previous.textContent = "←";
 
-  previous.disabled =
-    leaderboardCurrentPage === 1;
+  previous.disabled = leaderboardCurrentPage === 1;
 
   previous.onclick = () => {
-    if (
-      leaderboardCurrentPage > 1
-    ) {
+    if (leaderboardCurrentPage > 1) {
       leaderboardCurrentPage--;
 
       renderLeaderboard();
     }
   };
 
-  pagination.appendChild(
-    previous
-  );
+  pagination.appendChild(previous);
 
-  for (
-    let page = 1;
-    page <= totalPages;
-    page++
-  ) {
-    const button =
-      document.createElement("button");
+  for (let page = 1; page <= totalPages; page++) {
+    const button = document.createElement("button");
 
     button.textContent = page;
 
-    if (
-      page ===
-      leaderboardCurrentPage
-    ) {
-      button.classList.add(
-        "active"
-      );
+    if (page === leaderboardCurrentPage) {
+      button.classList.add("active");
     }
 
     button.onclick = () => {
-      leaderboardCurrentPage =
-        page;
+      leaderboardCurrentPage = page;
 
       renderLeaderboard();
     };
 
-    pagination.appendChild(
-      button
-    );
+    pagination.appendChild(button);
   }
 
-  const next =
-    document.createElement("button");
+  const next = document.createElement("button");
 
   next.textContent = "→";
 
-  next.disabled =
-    leaderboardCurrentPage ===
-    totalPages;
+  next.disabled = leaderboardCurrentPage === totalPages;
 
   next.onclick = () => {
-    if (
-      leaderboardCurrentPage <
-      totalPages
-    ) {
+    if (leaderboardCurrentPage < totalPages) {
       leaderboardCurrentPage++;
 
       renderLeaderboard();
@@ -1096,143 +819,198 @@ function renderLeaderboardPagination(
 
 // Deletes a current transaction
 async function deleteExpense(id) {
-  const confirmDelete =
-    confirm(
-      "Are you sure you want to delete this transaction?"
-    );
+  const confirmDelete = confirm(
+    "Are you sure you want to delete this transaction?",
+  );
 
   if (!confirmDelete) {
     return;
   }
 
   try {
-    const response = await fetch(
-      `${API_URL}/expenses/${id}`,
-      {
-        method: "DELETE",
+    const response = await fetch(`${API_URL}/expenses/${id}`, {
+      method: "DELETE",
 
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    );
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    const result =
-      await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
-      alert(
-        result.message ||
-          "Failed to delete transaction"
-      );
+      showMessage(result.message || "Failed to delete transaction");
 
       return;
     }
 
-    alert(
-      result.message ||
-        "Transaction deleted successfully!"
-    );
+    showMessage(result.message || "Transaction deleted successfully!");
 
     await fetchExpenses();
 
-    if (
-      user &&
-      user.isPremium === true
-    ) {
+    if (user && user.isPremium === true) {
       await fetchExpenseHistory();
     }
   } catch (error) {
-    console.error(
-      "Delete Transaction Error:",
-      error
-    );
+    console.error("Delete Transaction Error:", error);
 
-    alert(
-      "Server error. Please try again."
-    );
+    showMessage("Server error. Please try again.");
+  }
+}
+
+//edit expense
+
+function editExpense(id) {
+  const transaction = expenses.find((expense) => expense.id === id);
+
+  if (!transaction) {
+    showMessage("Transaction not found");
+    return;
+  }
+
+  document.getElementById("amount").value = transaction.amount;
+
+  document.getElementById("description").value = transaction.description || "";
+
+  const noteInput = document.getElementById("note");
+
+  if (noteInput) {
+    noteInput.value = transaction.note || "";
+  }
+
+  editingExpenseId = id;
+
+  const submitBtn = expenseForm.querySelector('button[type="submit"]');
+
+  if (submitBtn) {
+    submitBtn.textContent = "Update Transaction";
+  }
+
+  document.getElementById("amount").scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+
+  showMessage("Edit the details and click Update Transaction");
+}
+
+//Update expense data
+
+async function updateExpense(data) {
+  try {
+    if (aiStatus) {
+      aiStatus.textContent = "✨ AI Is Categorizing...";
+    }
+
+    const response = await fetch(`${API_URL}/expenses/${editingExpenseId}`, {
+      method: "PUT",
+
+      headers: {
+        "Content-Type": "application/json",
+
+        Authorization: `Bearer ${token}`,
+      },
+
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      if (aiStatus) {
+        aiStatus.textContent = "";
+      }
+
+      showMessage(result.message || "Failed to update transaction");
+
+      return;
+    }
+
+    // AI generated category show karo
+
+    if (aiStatus) {
+      aiStatus.textContent = `✨ AI categorized as ${result.expense.category}`;
+    }
+
+    showMessage(result.message || "Transaction updated successfully!");
+
+    expenseForm.reset();
+
+    if (aiStatus) {
+      aiStatus.textContent = "";
+    }
+
+    editingExpenseId = null;
+
+    const submitBtn = expenseForm.querySelector('button[type="submit"]');
+
+    if (submitBtn) {
+      submitBtn.textContent = "Add";
+    }
+
+    await fetchExpenses();
+
+    if (user && user.isPremium === true) {
+      await fetchExpenseHistory();
+    }
+  } catch (error) {
+    console.error("Update Transaction Error:", error);
+
+    if (aiStatus) {
+      aiStatus.textContent = "";
+    }
+
+    showMessage("Server error. Please try again.");
   }
 }
 
 // Initializes dark and light theme
 function initializeTheme() {
-  const themeToggle =
-    document.getElementById(
-      "themeToggle"
-    );
+  const themeToggle = document.getElementById("themeToggle");
 
   if (!themeToggle) {
     return;
   }
 
-  const savedTheme =
-    localStorage.getItem("theme");
+  const savedTheme = localStorage.getItem("theme");
 
   if (savedTheme === "dark") {
-    document.body.classList.add(
-      "dark-theme"
-    );
+    document.body.classList.add("dark-theme");
 
     themeToggle.textContent = "🌙";
   } else {
     themeToggle.textContent = "🌞";
   }
 
-  themeToggle.addEventListener(
-    "click",
-    () => {
-      document.body.classList.toggle(
-        "dark-theme"
-      );
+  themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark-theme");
 
-      const isDark =
-        document.body.classList.contains(
-          "dark-theme"
-        );
+    const isDark = document.body.classList.contains("dark-theme");
 
-      if (isDark) {
-        themeToggle.textContent =
-          "🌙";
+    if (isDark) {
+      themeToggle.textContent = "🌙";
 
-        localStorage.setItem(
-          "theme",
-          "dark"
-        );
-      } else {
-        themeToggle.textContent =
-          "🌞";
+      localStorage.setItem("theme", "dark");
+    } else {
+      themeToggle.textContent = "🌞";
 
-        localStorage.setItem(
-          "theme",
-          "light"
-        );
-      }
+      localStorage.setItem("theme", "light");
     }
-  );
+  });
 }
 
 // Handles premium membership payment
 async function handlePremiumPayment() {
-  const phone = prompt(
-    "Enter your 10 digit mobile number"
-  );
+  const phone = prompt("Enter your 10 digit mobile number");
 
   if (phone === null) {
     return;
   }
 
-  const cleanPhone =
-    phone.trim();
+  const cleanPhone = phone.trim();
 
-  if (
-    !/^[6-9]\d{9}$/.test(
-      cleanPhone
-    )
-  ) {
-    alert(
-      "Please enter a valid 10 digit mobile number"
-    );
+  if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+    alert("Please enter a valid 10 digit mobile number");
 
     return;
   }
@@ -1240,183 +1018,107 @@ async function handlePremiumPayment() {
   try {
     premiumBtn.disabled = true;
 
-    premiumBtn.innerText =
-      "Processing...";
+    premiumBtn.innerText = "Processing...";
 
-    const currentToken =
-      localStorage.getItem(
-        "token"
-      );
+    const currentToken = localStorage.getItem("token");
 
-    const response =
-      await fetch(
-        "/api/payment/create-order",
-        {
-          method: "POST",
+    const response = await fetch("/api/payment/create-order", {
+      method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
+      headers: {
+        "Content-Type": "application/json",
 
-            Authorization:
-              `Bearer ${currentToken}`,
-          },
+        Authorization: `Bearer ${currentToken}`,
+      },
 
-          body: JSON.stringify({
-            phone: cleanPhone,
-          }),
-        }
-      );
+      body: JSON.stringify({
+        phone: cleanPhone,
+      }),
+    });
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-      alert(
-        data.message ||
-          "Unable to create order"
-      );
+    if (!response.ok || !data.success) {
+      showMessage(data.message || "Unable to create order");
 
       premiumBtn.disabled = false;
 
-      premiumBtn.innerText =
-        "💎 Buy Premium Membership";
+      premiumBtn.innerText = "💎 Buy Premium Membership";
 
       return;
     }
 
     await cashfree.checkout({
-      paymentSessionId:
-        data.paymentSessionId,
+      paymentSessionId: data.paymentSessionId,
 
       redirectTarget: "_self",
     });
   } catch (error) {
-    console.error(
-      "Payment Error:",
-      error
-    );
+    console.error("Payment Error:", error);
 
-    alert(
-      "Something went wrong. Please try again."
-    );
+    showMessage("Something went wrong. Please try again.");
 
     premiumBtn.disabled = false;
 
-    premiumBtn.innerText =
-      "💎 Buy Premium Membership";
+    premiumBtn.innerText = "💎 Buy Premium Membership";
   }
 }
 
 // Verifies Cashfree payment
 async function verifyPayment(orderId) {
   try {
-    const currentToken =
-      localStorage.getItem(
-        "token"
-      );
+    const currentToken = localStorage.getItem("token");
 
-    const response =
-      await fetch(
-        `/api/payment/verify/${orderId}`,
-        {
-          method: "GET",
+    const response = await fetch(`/api/payment/verify/${orderId}`, {
+      method: "GET",
 
-          headers: {
-            Authorization:
-              `Bearer ${currentToken}`,
-          },
-        }
-      );
+      headers: {
+        Authorization: `Bearer ${currentToken}`,
+      },
+    });
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
-    if (
-      response.ok &&
-      data.status === "SUCCESSFUL"
-    ) {
-      alert(
-        "Transaction successful"
-      );
+    if (response.ok && data.status === "SUCCESSFUL") {
+      showMessage("Transaction successful");
 
-      const currentUser =
-        JSON.parse(
-          localStorage.getItem(
-            "user"
-          ) || "null"
-        );
+      const currentUser = JSON.parse(localStorage.getItem("user") || "null");
 
       if (currentUser) {
-        currentUser.isPremium =
-          true;
+        currentUser.isPremium = true;
 
-        localStorage.setItem(
-          "user",
-          JSON.stringify(
-            currentUser
-          )
-        );
+        localStorage.setItem("user", JSON.stringify(currentUser));
       }
 
       setPremiumBtn();
 
       if (boardBtn) {
-        boardBtn.style.display =
-          "flex";
+        boardBtn.style.display = "flex";
       }
 
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      );
-    } else if (
-      data.status === "FAILED"
-    ) {
-      alert(
-        "TRANSACTION FAILED."
-      );
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (data.status === "FAILED") {
+      showMessage("TRANSACTION FAILED.");
 
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      );
+      window.history.replaceState({}, document.title, window.location.pathname);
     } else {
-      alert(
-        data.message ||
-          "Unable to verify transaction."
-      );
+      showMessage(data.message || "Unable to verify transaction.");
     }
   } catch (error) {
-    console.error(
-      "Verification Error:",
-      error
-    );
+    console.error("Verification Error:", error);
 
-    alert(
-      "Unable to verify transaction."
-    );
+    showMessage("Unable to verify transaction.");
   }
 }
 
 // Opens leaderboard for premium users
 async function openLeaderboard() {
-  if (
-    !user ||
-    user.isPremium !== true
-  ) {
+  if (!user || user.isPremium !== true) {
     return;
   }
 
   if (leaderboardOverlay) {
-    leaderboardOverlay.classList.add(
-      "active"
-    );
+    leaderboardOverlay.classList.add("active");
   }
 
   leaderboardCurrentPage = 1;
@@ -1431,9 +1133,7 @@ async function openLeaderboard() {
 // Closes leaderboard panel
 function closeLeaderboardPanel() {
   if (leaderboardOverlay) {
-    leaderboardOverlay.classList.remove(
-      "active"
-    );
+    leaderboardOverlay.classList.remove("active");
   }
 }
 
@@ -1445,16 +1145,9 @@ function handleHistoryFilter() {
 }
 
 // Closes leaderboard when clicked outside
-function handleLeaderboardOutsideClick(
-  event
-) {
-  if (
-    event.target ===
-    leaderboardOverlay
-  ) {
-    leaderboardOverlay.classList.remove(
-      "active"
-    );
+function handleLeaderboardOutsideClick(event) {
+  if (event.target === leaderboardOverlay) {
+    leaderboardOverlay.classList.remove("active");
   }
 }
 
@@ -1464,36 +1157,24 @@ function formatLeaderboardDate(date) {
     return "";
   }
 
-  const d =
-    new Date(date);
+  const d = new Date(date);
 
-  if (
-    isNaN(
-      d.getTime()
-    )
-  ) {
+  if (isNaN(d.getTime())) {
     return "";
   }
 
-  return d.toLocaleDateString(
-    "en-IN",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }
-  );
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // Escapes HTML content safely
 function escapeHTML(value) {
-  const div =
-    document.createElement(
-      "div"
-    );
+  const div = document.createElement("div");
 
-  div.textContent =
-    value ?? "";
+  div.textContent = value ?? "";
 
   return div.innerHTML;
 }
@@ -1506,96 +1187,59 @@ async function initializeDashboard() {
 
   await fetchExpenses();
 
-  if (
-    user &&
-    user.isPremium === true
-  ) {
+  if (user && user.isPremium === true) {
     await fetchExpenseHistory();
   }
 }
 
 // Handles user logout
 if (logoutBtn) {
-  logoutBtn.addEventListener(
-    "click",
-    () => {
-      localStorage.removeItem(
-        "token"
-      );
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
 
-      localStorage.removeItem(
-        "user"
-      );
+    localStorage.removeItem("user");
 
-      window.location.href =
-        "login.html";
-    }
-  );
+    window.location.href = "login.html";
+  });
 }
 
 // Handles expense form submission
 if (expenseForm) {
-  expenseForm.addEventListener(
-    "submit",
-    addTransaction
-  );
+  expenseForm.addEventListener("submit", addTransaction);
 }
 
 // Handles premium payment button
 if (premiumBtn) {
-  premiumBtn.addEventListener(
-    "click",
-    handlePremiumPayment
-  );
+  premiumBtn.addEventListener("click", handlePremiumPayment);
 }
 
 // Handles leaderboard button click
-if (
-  boardBtn &&
-  user &&
-  user.isPremium === true
-) {
-  boardBtn.addEventListener(
-    "click",
-    openLeaderboard
-  );
+if (boardBtn && user && user.isPremium === true) {
+  boardBtn.addEventListener("click", openLeaderboard);
 }
 
 // Handles leaderboard close button
 if (closeLeaderboard) {
-  closeLeaderboard.addEventListener(
-    "click",
-    closeLeaderboardPanel
-  );
+  closeLeaderboard.addEventListener("click", closeLeaderboardPanel);
 }
 
 // Handles leaderboard outside click
 if (leaderboardOverlay) {
-  leaderboardOverlay.addEventListener(
-    "click",
-    handleLeaderboardOutsideClick
-  );
+  leaderboardOverlay.addEventListener("click", handleLeaderboardOutsideClick);
 }
 
 // Handles history filter change
 if (historyFilter) {
-  historyFilter.addEventListener(
-    "change",
-    handleHistoryFilter
-  );
+  historyFilter.addEventListener("change", handleHistoryFilter);
 }
 
 checkPremiumStatus();
 
 initializeDashboard();
 
-const urlParams =
-  new URLSearchParams(
-    window.location.search
-  );
+const urlParams = new URLSearchParams(window.location.search);
 
-const orderId =
-  urlParams.get("order_id");
+const orderId = urlParams.get("order_id");
 
 if (orderId) {
   verifyPayment(orderId);
