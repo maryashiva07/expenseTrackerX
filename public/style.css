@@ -1576,24 +1576,37 @@ body.dark-theme #totalIncome {
   color: #16a34a;
 }
 
+.delete-btn:hover{
+    background: khaki;
+}
+
 body.dark-theme .edit-btn {
   padding: 7px 11px;
   border: 1px solid #3fe108;
   border-radius: 6px;
-  background: #fff;
+  background: transparent;
   color: #27a309;
   cursor: pointer;
   font-size: 12px;
+}
+
+body.dark-theme .edit-btn:hover{
+    background-color: black;
 }
 
 .edit-btn {
   padding: 7px 11px;
   border: 1px solid #3fe108;
   border-radius: 6px;
-  background: #fff;
+  background: transparent;
   color: #27a309;
   cursor: pointer;
   font-size: 12px;
+}
+
+.edit-btn:hover{
+    background-color: black;
+    color: white;
 }
 
 /* LARGE LAPTOP / SMALL DESKTOP */
