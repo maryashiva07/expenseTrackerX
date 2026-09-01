@@ -10,7 +10,7 @@ const googleGenAi = async (desc) => {
     console.log("Calling Gemini with:", desc);
 
     const interaction = await ai.interactions.create({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.5-flash-lite",
       input: `
 You are an expense categorization assistant.
 
