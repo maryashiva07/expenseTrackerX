@@ -64,15 +64,25 @@ const expenseMessage = document.getElementById("msg");
 
 let editingExpenseId = null;
 
-function showMessage(message, type = "success") {
-  expenseMessage.textContent = message;
+const messageBox = document.getElementById("messageBox");
 
-  expenseMessage.className = type;
+let messageTimeout;
 
-  // Optional: automatically hide after 3 seconds
-  setTimeout(() => {
-    expenseMessage.textContent = "";
-    expenseMessage.className = "";
+function showMessage(message) {
+  if (!messageBox) {
+    console.error("Message box not found");
+
+    return;
+  }
+
+  clearTimeout(messageTimeout);
+
+  messageBox.textContent = message;
+
+  messageBox.classList.add("show");
+
+  messageTimeout = setTimeout(() => {
+    messageBox.classList.remove("show");
   }, 3000);
 }
 
@@ -926,11 +936,6 @@ async function updateExpense(data) {
       return;
     }
 
-    // AI generated category show karo
-
-    if (aiStatus) {
-      aiStatus.textContent = `✨ AI categorized as ${result.expense.category}`;
-    }
 
     showMessage(result.message || "Transaction updated successfully!");
 
