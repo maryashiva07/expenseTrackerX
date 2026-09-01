@@ -583,6 +583,140 @@ function filterHistoryData() {
   return historyExpenses;
 }
 
+
+// DOWNLOAD EXPENSE REPORT
+
+const downloadBtn = document.getElementById("downloadFileBtn");
+
+if (downloadBtn) {
+  downloadBtn.addEventListener("click", async () => {
+    await fetchExpenseHistory();
+
+    const filterData = filterHistoryData();
+
+    if (!filterData || filterData.length === 0) {
+      showMessage("No transaction data to download!");
+      return;
+    }
+
+    downloadExcel(filterData);
+  });
+}
+
+function downloadExcel(data) {
+  // Create workbook
+  const workbook = XLSX.utils.book_new();
+
+  // Prepare transaction data
+  const rows = data.map((transaction, index) => {
+    const income = isIncome(transaction);
+
+    return {
+      "S.No": index + 1,
+
+      Description: (transaction.description || "")
+        .replace(/\r?\n|\r/g, " ")
+        .trim(),
+
+      Category: transaction.category || "Other",
+
+      Date: new Date(transaction.createdAt).toLocaleDateString("en-IN"),
+
+      Type: income ? "Income" : "Expense",
+
+      "Amount (₹)": Number(transaction.amount || 0),
+    };
+  });
+
+  // Create worksheet
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  // Add summary
+  const totalIncome = data.reduce((total, transaction) => {
+    if (isIncome(transaction)) {
+      return total + Number(transaction.amount || 0);
+    }
+
+    return total;
+  }, 0);
+
+  const totalExpense = data.reduce((total, transaction) => {
+    if (!isIncome(transaction)) {
+      return total + Number(transaction.amount || 0);
+    }
+
+    return total;
+  }, 0);
+
+  const netBalance = totalIncome - totalExpense;
+
+  // Leave one empty row
+  XLSX.utils.sheet_add_aoa(
+    worksheet,
+    [
+      [],
+      ["FINANCIAL SUMMARY"],
+      ["Total Income", totalIncome],
+      ["Total Expense", totalExpense],
+      ["Net Balance", netBalance],
+    ],
+    {
+      origin: -1,
+    },
+  );
+
+  // Column widths
+  worksheet["!cols"] = [
+    { wch: 8 }, // S.No
+    { wch: 30 }, // Description
+    { wch: 20 }, // Category
+    { wch: 15 }, // Date
+    { wch: 14 }, // Type
+    { wch: 16 }, // Amount
+  ];
+
+  // Bold header
+  const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
+
+  for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+    const cellAddress = XLSX.utils.encode_cell({
+      r: 0,
+      c: col,
+    });
+
+    if (worksheet[cellAddress]) {
+      worksheet[cellAddress].s = {
+        font: {
+          bold: true,
+        },
+      };
+    }
+  }
+
+  // Format amount column
+  for (let row = 1; row <= data.length; row++) {
+    const cellAddress = `G${row + 1}`;
+
+    if (worksheet[cellAddress]) {
+      worksheet[cellAddress].z = "₹#,##0.00";
+    }
+  }
+
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Expense Report");
+
+  // Get selected filter
+  const filter = historyFilter?.value || "all";
+
+  // Generate Excel file
+  XLSX.writeFile(workbook, `expense-report-${filter}.xlsx`);
+
+  showMessage("Excel report downloaded successfully!");
+}
+
+
+
+
 // Renders filtered leaderboard data
 function renderLeaderboard() {
   if (!leaderboardList) {
