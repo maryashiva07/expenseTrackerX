@@ -222,8 +222,6 @@ async function addTransaction(event) {
       // alert(result.message || "Failed to add transaction");
       showMessage(result.message || "Failed to add transaction!");
 
-      // expenseMessage.textContent = `${result.message}` || "Failed to add transaction";
-
       return;
     }
 
@@ -827,46 +825,62 @@ function renderLeaderboardPagination(filteredHistory) {
   pagination.appendChild(next);
 }
 
-// Deletes a current transaction
+// Deletes
+
+const deleteModal = document.getElementById("deleteModal");
+
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+let expenseIdToDelete = null;
+
 async function deleteExpense(id) {
-  const confirmDelete = confirm(
-    "Are you sure you want to delete this transaction?",
-  );
+  expenseIdToDelete = id;
 
-  if (!confirmDelete) {
-    return;
-  }
+  deleteModal.classList.add("active");
 
-  try {
-    const response = await fetch(`${API_URL}/expenses/${id}`, {
-      method: "DELETE",
+  confirmDeleteBtn.addEventListener("click", async () => {
+    if (!expenseIdToDelete) return;
 
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const response = await fetch(`${API_URL}/expenses/${id}`, {
+        method: "DELETE",
 
-    const result = await response.json();
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    if (!response.ok) {
-      showMessage(result.message || "Failed to delete transaction");
+      const result = await response.json();
 
-      return;
+      if (!response.ok) {
+        showMessage(result.message || "Failed to delete transaction");
+
+        return;
+      }
+
+      deleteModal.classList.remove("active");
+
+      showMessage(result.message || "Transaction deleted successfully!");
+
+      await fetchExpenses();
+
+      if (user && user.isPremium === true) {
+        await fetchExpenseHistory();
+      }
+    } catch (error) {
+      console.error("Delete Transaction Error:", error);
+
+      showMessage("Server error. Please try again.");
     }
-
-    showMessage(result.message || "Transaction deleted successfully!");
-
-    await fetchExpenses();
-
-    if (user && user.isPremium === true) {
-      await fetchExpenseHistory();
-    }
-  } catch (error) {
-    console.error("Delete Transaction Error:", error);
-
-    showMessage("Server error. Please try again.");
-  }
+  });
 }
+
+cancelDeleteBtn.addEventListener("click", () => {
+  deleteModal.classList.remove("active");
+  expenseIdToDelete = null;
+});
 
 //edit expense
 
@@ -935,7 +949,6 @@ async function updateExpense(data) {
 
       return;
     }
-
 
     showMessage(result.message || "Transaction updated successfully!");
 
