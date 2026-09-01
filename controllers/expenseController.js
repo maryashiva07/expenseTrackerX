@@ -4,6 +4,53 @@ const { googleGenAi } = require("../controllers/genaiController");
 const ExpenseHistory = require("../modules/ExpenseHistory");
 const sequelize = require("../config/database");
 
+
+
+// Get AI category from Redis or Gemini
+
+const getCategoryFromCacheOrAI = async (
+  description,
+  fallbackCategory = "Other",
+) => {
+  try {
+    const normalizedDescription = description
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_");
+
+    const categoryCacheKey = `category:${normalizedDescription}`;
+
+    const cachedCategory = await redisClient.get(categoryCacheKey);
+
+    if (cachedCategory) {
+      console.log("AI category fetched from Redis cache");
+
+      return cachedCategory;
+    }
+
+    console.log("Calling Gemini AI for category");
+
+    const category = await googleGenAi(description);
+
+    await redisClient.set(categoryCacheKey, category, {
+      EX: 60 * 60 * 24,
+    });
+
+    console.log("AI category saved in Redis cache");
+
+    return category;
+  } catch (error) {
+    console.error(
+      "AI categorization failed. Using fallback category:",
+      error.message,
+    );
+
+    return fallbackCategory;
+  }
+};
+
+
+
 // Create expense
 
 const createExpenses = async (req, res) => {
@@ -14,9 +61,9 @@ const createExpenses = async (req, res) => {
   try {
     transaction = await sequelize.transaction();
 
-    const category = await googleGenAi(description);
+    const category = await getCategoryFromCacheOrAI(description, "Other");
 
-    console.log("Ai gen Category: ", category);
+    console.log("Generated category:", category);
 
     const expense = await Expense.create(
       {
@@ -24,7 +71,6 @@ const createExpenses = async (req, res) => {
         description,
         category,
         note,
-
         userId: req.user.id,
       },
       {
@@ -51,25 +97,23 @@ const createExpenses = async (req, res) => {
 
     await redisClient.del(cacheKey);
 
+    console.log("Expense list Redis cache deleted");
+
     res.status(201).json({
       message: "Expense created Successfully",
 
       expenses: {
         id: expense.id,
-
         amount: expense.amount,
-
         description: expense.description,
-
         category: expense.category,
-
         note: expense.note,
       },
 
       expenseHistory,
     });
   } catch (err) {
-    console.error("Create Expense Error: ", err);
+    console.error("Create Expense Error:", err);
 
     if (transaction) {
       await transaction.rollback();
@@ -83,7 +127,9 @@ const createExpenses = async (req, res) => {
   }
 };
 
-//Get History Data
+
+
+// Get history data
 
 const getHistoryData = async (req, res) => {
   const userId = req.user.id;
@@ -93,20 +139,25 @@ const getHistoryData = async (req, res) => {
       where: {
         userId: userId,
       },
+
       order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
       message: "Expense Fetched Successfully",
+
       historyData,
     });
   } catch (err) {
     res.status(500).json({
       message: "Error on fetching expenses",
+
       err: err.message,
     });
   }
 };
+
+
 
 // Show all expenses
 
@@ -119,7 +170,7 @@ const showExpenses = async (req, res) => {
     const cachedExpense = await redisClient.get(cacheKey);
 
     if (cachedExpense) {
-      console.log("Redis cache hit");
+      console.log("Redis expense cache hit");
 
       return res.status(200).json({
         message: "Expenses fetched from cache",
@@ -138,15 +189,9 @@ const showExpenses = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    await redisClient.set(
-      cacheKey,
-
-      JSON.stringify(expenses),
-
-      {
-        EX: 60 * 5,
-      },
-    );
+    await redisClient.set(cacheKey, JSON.stringify(expenses), {
+      EX: 60 * 5,
+    });
 
     res.status(200).json({
       message: "Expenses Fetched Successfully",
@@ -161,6 +206,8 @@ const showExpenses = async (req, res) => {
     });
   }
 };
+
+
 
 // Delete expense
 
@@ -184,19 +231,17 @@ const deleteExpenses = async (req, res) => {
 
     await expense.destroy();
 
-    // Delete user's expense cache
-
     const cacheKey = `expenses:user:${req.user.id}`;
 
     await redisClient.del(cacheKey);
 
-    console.log("Redis cache deleted:", cacheKey);
+    console.log("Redis expense cache deleted:", cacheKey);
 
     res.status(200).json({
       message: "Expense Deleted successfully",
     });
   } catch (err) {
-    console.log(err);
+    console.error("Delete Expense Error:", err);
 
     res.status(500).json({
       message: "Error deleting expenses",
@@ -207,16 +252,19 @@ const deleteExpenses = async (req, res) => {
 };
 
 
-// Edit expenses
+
+// Edit expense
 
 const editExpenses = async (req, res) => {
   const { id } = req.params;
+
   const { amount, description, note } = req.body;
 
   try {
     const expense = await Expense.findOne({
       where: {
         id: id,
+
         userId: req.user.id,
       },
     });
@@ -227,40 +275,58 @@ const editExpenses = async (req, res) => {
       });
     }
 
-    expense.amount = amount || expense.amount;
+    if (amount !== undefined && amount !== "") {
+      expense.amount = amount;
+    }
 
-    expense.description = description || expense.description;
+    const oldDescription = expense.description;
 
-    expense.note = note !== undefined ? note : expense.note;
+    if (description !== undefined && description.trim() !== "") {
+      expense.description = description;
 
-    if (description) {
-      const category = await googleGenAi(description);
-      expense.category = category;
+      // categorize if description changed
+
+      if (
+        description.trim().toLowerCase() !== oldDescription.trim().toLowerCase()
+      ) {
+        const category = await getCategoryFromCacheOrAI(
+          description,
+          expense.category,
+        );
+
+        expense.category = category;
+      }
+    }
+
+    if (note !== undefined) {
+      expense.note = note;
     }
 
     await expense.save();
-
-    //delete redis cache
 
     const cacheKey = `expenses:user:${req.user.id}`;
 
     await redisClient.del(cacheKey);
 
-    console.log("Redis cache deleted after updation!");
+    console.log("Redis expense cache deleted after update");
 
     res.status(200).json({
       message: "Expense Updated successfully",
+
       expense,
     });
   } catch (err) {
-    console.error("Edit expense error", err);
+    console.error("Edit Expense Error:", err);
 
     res.status(500).json({
       message: "Error on updation",
+
       err: err.message,
     });
   }
 };
+
+
 
 module.exports = {
   createExpenses,
@@ -269,4 +335,3 @@ module.exports = {
   deleteExpenses,
   editExpenses,
 };
-
