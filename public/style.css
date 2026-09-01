@@ -1609,6 +1609,53 @@ body.dark-theme .edit-btn:hover{
     color: white;
 }
 
+
+.message-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+
+    transform: translate(-50%, -150%);
+
+    min-width: 280px;
+    max-width: 90vw;
+
+    padding: 15px 25px;
+
+    background: #141fb7;
+    color: white;
+
+    border-radius: 10px;
+
+    text-align: center;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    box-shadow: 0 8px 25px rgba(209, 170, 170, 0.25);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        transform 0.4s ease,
+        opacity 0.4s ease,
+        visibility 0.4s ease;
+
+    z-index: 9999;
+}
+
+.message-box.show {
+    transform: translate(-50%, 0);
+
+    opacity: 1;
+
+    visibility: visible;
+}
+
 /* LARGE LAPTOP / SMALL DESKTOP */
 
 @media (max-width: 1100px) {
